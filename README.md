@@ -23,17 +23,27 @@ It exists because the stock firmware targets that panel without quite fitting it
 
 **Everything that makes the Marauder work is upstream's.** The WiFi and Bluetooth tooling, the CLI, the wardriving upload, the Evil Portal, the GPS stack, the drivers — none of that is mine. See [Attribution](#attribution). What is different is listed below, in full, and the changes are also in [`patches/`](patches/) as a diff against upstream v1.17.0.
 
-## What changed
+## Fixes to upstream code
 
-| area | change |
-|---|---|
-| **Text fitting** | On a 128 px panel a row holds 21 characters, and upstream clipped anything longer. Long values now wrap onto the rows below instead of vanishing, screen titles drop to a smaller font when they would overrun, and the Follow list shows the whole MAC instead of only its second half. |
-| **GPS screens** | The date/time and UTC stamps (23–24 chars) were being cut off. Every GPS line wraps now, the row budget is asserted by a test, and the raw NMEA screen wraps its 60–80 character sentences instead of clipping them at 21. |
-| **Colouring** | Menus colour by *what an item is* — tags one colour, Bluetooth another, passive monitors another, attacks another — so like items match and no submenu is monochrome. Data screens dim the field name and colour the value by its kind. |
-| **Palette** | Neon cyberpunk, built from a reference image: cyan, hacker green, orange, cyberpunk red, magenta, yellow, periwinkle, lime, purple on black, with a deep indigo status bar. |
-| **Boot splash** | A synthwave sunset with the **CYBERPUNK EDITION** wordmark and a "Jacking in..." tagline. |
-| **Brightness** | Backlight level in **Device → Brightness**, using the 5-way switch, saved to NVS. |
-| **Status bar** | GPS in three states (no module / no fix / fix) and SD green-or-red, so a failure is obvious before it bites. |
+These are defects in upstream's handling of this panel. Each one is a change to the original code, and each is listed with its cause so it can be checked against the [patch](patches/cyberpunk-edition.patch).
+
+| symptom on the device | cause in the original code | fix |
+|---|---|---|
+| MAC addresses, BSSIDs, IP addresses, hardware names cut off mid-string | a 128 px panel shows **21 characters** per row, and the original printer drew every line as a single row — anything longer was simply clipped | new `Display::printWrapped()` continues a long line on the rows below, leaving the cursor where a plain `println()` would, so surrounding layout is untouched |
+| screen titles losing their tail (`SSID Beacon Clone`, `Bluetooth Analyzer`) | titles drawn in the large font (8 px per glyph) — 16 characters fit across 128 px | titles fall back to the small font when the large one would overrun the panel |
+| the Follow / device list showing `DD:EE:FF Tx: 12 4s` | the mini-screen branch deliberately printed only `mac_str.substring(mac_str.length() / 2)` — the **second half** of the MAC | the whole MAC is printed, wrapping if needed |
+| GPS **date/time and UTC stamps** cut off | the D/T and UTC strings are 23–24 characters — the longest lines on those screens — and went through single-line prints | every GPS data line wraps, and `test_gps_layout` asserts the row budget so a field added later fails a test instead of vanishing |
+| raw **NMEA sentences** cut at 21 characters | `GPS_NMEA_SCRNWRAP` is `false` for the Mini targets, so 60–80 character sentences were clipped — even though that screen's row accounting was written to expect wrapped ones | wrapping enabled for the Mini v3 (`MARAUDER_MINI` left exactly as upstream had it) |
+| GPS indicator in the status bar blank with no module attached | upstream draws it only when a module is detected, and shows red for "no fix" — so *absent* and *searching* looked identical | always drawn, in three states: red = no module, amber = no fix yet, green = fix |
+| `SD` label could be drawn in an undefined colour | `updateStatusBar()` reads `the_color` on the screen path without it having been assigned when `HAS_SD` is undefined | variable initialised, and the SD label only drawn where `HAS_SD` exists |
+
+## What this build adds on top
+
+Not fixes — additions. Marked separately so nothing is misattributed to upstream:
+
+- **The neon palette and colour scheme.** Menus colour by what an item *is*; data screens dim the field name and colour the value by its kind. The palette is generated with two enforced rules (see below).
+- **The boot splash.** A synthwave sunset with the CYBERPUNK EDITION wordmark, drawn from a table of horizontal runs (~1.7 KB) rather than a pixel buffer (~18 KB).
+- **Screen brightness on the Mini v3.** Upstream has the setting and a PWM backlight, but both sit behind `#ifndef HAS_MINI_SCREEN` because its brightness screen is touch-driven — and this board's switch is a 5-way tactile control.
 
 ### The palette, and the two rules behind it
 
