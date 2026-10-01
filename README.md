@@ -8,14 +8,6 @@
 <img src="https://img.shields.io/badge/%E2%96%B6%20%20FLASH%20THE%20FIRMWARE-Cyberpunk%20Edition-ED4FD0?style=for-the-badge&labelColor=140B2B" alt="Flash the firmware from your browser" height="44">
 </a>
 
-### <a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/">→ Open the web flasher</a>
-
-**Chrome or Edge → plug the Mini v3 in over USB-C → pick the port.** Nothing to install, no
-toolchain, no drivers — the firmware is written straight from the browser over USB.
-
-Tick **Application update** and your settings, saved WiFi and Evil Portal templates are kept.
-A full-install image is there too, for a blank board.
-
 ### A neon retheme and 128 px text-fitting rebuild of **ESP32 Marauder**, for the Marauder Mini v3.
 
 [![Upstream](https://img.shields.io/badge/upstream-ESP32Marauder-4FE3EE?style=for-the-badge&labelColor=140B2B)](https://github.com/justcallmekoko/ESP32Marauder)
@@ -26,6 +18,18 @@ A full-install image is there too, for a blank board.
 </div>
 
 ---
+
+## Flash it
+
+**<a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/">Open the web flasher</a>** — in Chrome or Edge, plug the board in over USB-C, and pick the port. Nothing to install: no toolchain, no drivers, no command line. The page talks to the board over USB.
+
+- **Application update** — replaces the app only. **Keeps your settings**, saved WiFi, and Evil Portal templates. Use this one.
+- **Full install (factory image)** — writes the whole 8 MB flash. For a blank or unknown board; wipes settings.
+
+If no port appears, unplug and hold **BOOT** while plugging back in.
+
+**The flash layout is byte-identical to the official v1.17.0 Mini v3 release** — same bootloader, same partition table, same OTA data — so the [official JCMK installer](https://justcallmekoko.github.io/MarauderInstaller/) remains a valid recovery path at any time.
+
 
 ## What this is
 
@@ -86,18 +90,7 @@ Both rules are enforced by the generator (`tools/generate_neon_palette.py`) rath
 | fox hunt, geofences | `#A6F53C` | 16.0:1 |
 | Bluetooth | `#B071F0` | 6.7:1 |
 | configuration | `#CFDCEE` | 15.4:1 |
-| Back / exit rows | `#93A2C0` | 8.2:1 |
-
-## Flash it
-
-**[Flash it from your browser](https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/)** — Chrome or Edge, plug the board in over USB-C, pick the port.
-
-- **Application update** — replaces the app only. **Keeps your settings**, saved WiFi, and Evil Portal templates. Use this one.
-- **Full install (factory image)** — writes the whole 8 MB flash. For a blank or unknown board; wipes settings.
-
-If no port appears, unplug and hold **BOOT** while plugging back in.
-
-**The flash layout is byte-identical to the official v1.17.0 Mini v3 release** — same bootloader, same partition table, same OTA data — so the [official JCMK installer](https://justcallmekoko.github.io/MarauderInstaller/) remains a valid recovery path at any time.
+| Back / exit rows | `#B4C1D8` | 11.8:1 |
 
 ## Build it
 

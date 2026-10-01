@@ -6,29 +6,34 @@
 <title>Marauder Mini v3 &mdash; Cyberpunk Edition firmware flasher</title>
 <style>
   :root {
-    /* The same palette the firmware draws with. */
-    --bg: #0a0618;
-    --surface: #140b2b;
-    --surface-2: #1b1035;
-    --line: #2a1b4a;
-    --fg: #eaf7ff;
-    --muted: #93a2c0;
-    --cyan: #4fe3ee;
-    --magenta: #ed4fd0;
-    --amber: #ffe633;
-    --ok: #4dff7a;
-    --warn: #ff8c55;
-    --red: #ff3355;
-    --blue: #7fa8ff;
-    --lime: #a6f53c;
-    --purple: #b071f0;
+    /* A brighter web rendering of the palette the firmware draws with: same hues,
+       lifted off black so the page itself is not as dark as the panel it flashes. */
+    --bg: #17103a;
+    --surface: #221858;
+    --surface-2: #2d2170;
+    --line: #4b3d92;
+    --fg: #f4faff;
+    --muted: #bcc9e6;
+    --cyan: #6eeaf6;
+    --magenta: #f56fe0;
+    --amber: #ffe95c;
+    --ok: #6aff92;
+    --warn: #ffa070;
+    --red: #ff5470;
+    --blue: #96b8ff;
+    --lime: #b8f75c;
+    --purple: #c48dff;
   }
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    background: var(--bg);
+    background:
+      radial-gradient(900px 420px at 50% -120px, rgba(110,234,246,.16), transparent 70%),
+      radial-gradient(700px 380px at 100% 0, rgba(245,111,224,.12), transparent 70%),
+      var(--bg);
+    background-attachment: fixed;
     color: var(--fg);
     font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -74,11 +79,12 @@
     border-radius: 14px;
     padding: 22px;
     margin-bottom: 16px;
+    box-shadow: 0 0 0 1px rgba(110,234,246,.06), 0 8px 30px rgba(0,0,0,.28);
   }
 
-  .card.recommended { border-color: #2b5b57; }
+  .card.recommended { border-color: rgba(106,255,146,.55); }
 
-  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card h3 { margin: 0 0 6px; font-size: 17px; color: var(--fg); }
 
   .tag {
     display: inline-block;
@@ -91,8 +97,8 @@
     margin-left: 8px;
     vertical-align: 2px;
   }
-  .tag.keeps { background: rgba(61,220,132,.14); color: var(--ok); }
-  .tag.erases { background: rgba(255,159,67,.14); color: var(--warn); }
+  .tag.keeps { background: rgba(106,255,146,.20); color: var(--ok); }
+  .tag.erases { background: rgba(255,160,112,.20); color: var(--warn); }
 
   .card p { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
 
