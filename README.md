@@ -4,7 +4,7 @@
 
 <br>
 
-<a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/">
+<a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/" target="_blank" rel="noopener">
 <img src="https://img.shields.io/badge/%E2%96%B6%20%20FLASH%20THE%20FIRMWARE-Cyberpunk%20Edition-ED4FD0?style=for-the-badge&labelColor=140B2B" alt="Flash the firmware from your browser" height="44">
 </a>
 
@@ -21,7 +21,7 @@
 
 ## Flash it
 
-**<a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/">Open the web flasher</a>** — in Chrome or Edge, plug the board in over USB-C, and pick the port. Nothing to install: no toolchain, no drivers, no command line. The page talks to the board over USB.
+**<a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/" target="_blank" rel="noopener">Open the web flasher</a>** — in Chrome or Edge, plug the board in over USB-C, and pick the port. Nothing to install: no toolchain, no drivers, no command line. The page talks to the board over USB.
 
 - **Application update** — replaces the app only. **Keeps your settings**, saved WiFi, and Evil Portal templates. Use this one.
 - **Full install (factory image)** — writes the whole 8 MB flash. For a blank or unknown board; wipes settings.
