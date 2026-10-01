@@ -26,8 +26,6 @@
 - **Application update** — replaces the app only. **Keeps your settings**, saved WiFi, and Evil Portal templates. Use this one.
 - **Full install (factory image)** — writes the whole 8 MB flash. For a blank or unknown board; wipes settings.
 
-If no port appears, unplug and hold **BOOT** while plugging back in.
-
 **The flash layout is byte-identical to the official v1.17.0 Mini v3 release** — same bootloader, same partition table, same OTA data — so the [official JCMK installer](https://justcallmekoko.github.io/MarauderInstaller/) remains a valid recovery path at any time.
 
 
