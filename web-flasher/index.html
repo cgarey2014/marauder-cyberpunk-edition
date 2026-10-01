@@ -196,8 +196,10 @@
           being cut off mid-string; every GPS line wraps now, and so do the 60&ndash;80
           character NMEA sentences on the raw NMEA screen.</li>
       <li><strong>Colour that means something.</strong> Menus colour by what an item
-          <em>is</em> &mdash; tags one colour, Bluetooth another, passive monitors another,
-          attacks another &mdash; so like items match and no submenu is one flat colour.
+          <em>is</em> &mdash; tags one colour, Bluetooth another, passive monitors another
+          &mdash; with a floor of 35&deg; of hue between any two colours in the same menu,
+          so no submenu reads as one flat colour. The attack menus are grouped by
+          mechanism: beacon spam, floods and disruption, and rogue-AP or social attacks.
           On data screens the field name is dimmed and the value is coloured by its kind,
           so a screen of readings can be skimmed by shape.</li>
       <li><strong>New boot screen:</strong> a synthwave sunset with a neon skyline and the
@@ -248,8 +250,8 @@
     <ol style="margin:0">
       <li>Use <strong>Chrome</strong> or <strong>Edge</strong> on a desktop &mdash; Firefox and
           Safari cannot talk to USB serial.</li>
-      <li>Serve this folder over HTTP; Web Serial is only available on
-          <code>https://</code> or <code>http://localhost</code>. See below.</li>
+      <li>This page is served over <code>https://</code>, which is what Web Serial requires.
+          Nothing to install.</li>
       <li>Plug the Mini v3 in with a <strong>data-capable USB-C cable</strong>.</li>
       <li>Click an install button and pick the board's serial port. It usually shows up
           as <code>USB JTAG/serial debug unit</code> or <code>USB Serial Device</code>.</li>
@@ -258,14 +260,6 @@
       <li>Wait for 100%, then the board reboots on its own. If it stays dark, press the
           reset button.</li>
     </ol>
-  </div>
-
-  <h2>Running this page</h2>
-  <div class="callout">
-    Opening the file directly from Finder will <strong>not</strong> work &mdash; browsers block
-    USB serial on <code>file://</code>. From a terminal, in this folder:
-    <pre><code>python3 -m http.server 8000</code></pre>
-    then open <code>http://localhost:8000/</code>.
   </div>
 
   <h2>Other ways to flash</h2>
@@ -318,8 +312,8 @@
       "This browser has no Web Serial support. Use Chrome or Edge on a desktop.";
   } else if (!secure) {
     document.getElementById("update-note").innerHTML =
-      "USB access is blocked on <code>file://</code>. Serve this folder over " +
-      "<code>http://localhost</code> and reload &mdash; see below.";
+      "USB access needs an <code>https://</code> page. Open this flasher from its " +
+      "hosted address rather than from a local file.";
   } else {
     document.getElementById("update-note").innerHTML =
       "Pick the board's serial port when the browser asks.";

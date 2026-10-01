@@ -101,7 +101,7 @@ Four problems were reported from the field, plus one hardware question:
 | report | cause | fix |
 |---|---|---|
 | WiFi and Bluetooth counters same colour while wardriving | the palette's "success" colour was mint `#3FE8B0`, 27 degrees of hue from the accent cyan `#4FE3EE` the BT counter used - indistinguishable at 16 px | success is now a true green, Bluetooth has its own purple family, and the generator refuses any palette with two saturated entries within 30 degrees of hue |
-| not enough colour variety, inconsistent | a menu of one kind was a rainbow of one-off colours | 185 `addNodes` colours repainted by family: scanners cyan, sniffers pale cyan, attacks red, Bluetooth purple, GPS green, files orange, choices yellow, fox hunt lime, settings neutral, Back rows de-emphasised |
+| not enough colour variety, inconsistent | a menu of one kind was a rainbow of one-off colours, or (after the first attempt at fixing that) one flat colour for the whole menu | 185 `addNodes` colours repainted by family, then refined so no menu uses fewer than two colours: scanners cyan, sniffers pale cyan, attacks split by mechanism (spam red, floods magenta, rogue-AP yellow), Bluetooth purple, GPS green, files orange, choices yellow, fox hunt lime, settings neutral, Back rows de-emphasised |
 | GPS screens cut the text off | the date/time and UTC stamps (23-24 chars) went through single-line prints on a 21-character panel | every GPS data line now wraps; the row budget is asserted by `test_gps_layout` so a field added later fails a test instead of disappearing |
 | battery indicator | this board defines no battery source at all, and its IP5306's I2C pins are not documented anywhere public | **not implemented - an attempt was reverted, see below.** Bootloader and everything else unaffected |
 
@@ -221,7 +221,10 @@ so the same kind of thing is always the same colour:
 | main menu | Recon magenta, WiFi green, Bluetooth purple, GPS green, Device blue |
 | WiFi scanners / AP lists | cyan |
 | WiFi sniffers, probe/station select | pale cyan |
-| anything that transmits - attacks, spam, Evil Portal | red |
+| anything that transmits - beacon and frame spam | red |
+| attacks that flood or disrupt (deauth, SAE, assoc sleep, channel switch) | magenta |
+| rogue-AP and social attacks (Evil Portal, Karma, Bad Msg) | yellow |
+| BLE: Apple pop-up spam / tag attacks (Spoof Airtag, FindMy Sound) | lime / magenta |
 | Bluetooth (menus and sniffers) | purple |
 | GPS, wardriving, geofences | green |
 | files, SD, save/load/upload | orange |

@@ -9,7 +9,7 @@
 [![Base](https://img.shields.io/badge/base-v1.17.0-FFE633?style=for-the-badge&labelColor=140B2B)](#what-changed)
 [![License](https://img.shields.io/badge/license-MIT-ED4FD0?style=for-the-badge&labelColor=140B2B)](LICENSE)
 
-**Flash it from your browser** → [open the web flasher](https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/)
+**Flash it from your browser** → <a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/" target="_blank" rel="noopener"><strong>open the web flasher</strong></a>
 
 </div>
 
@@ -41,9 +41,18 @@ These are defects in upstream's handling of this panel. Each one is a change to 
 
 Not fixes — additions. Marked separately so nothing is misattributed to upstream:
 
-- **The neon palette and colour scheme.** Menus colour by what an item *is*; data screens dim the field name and colour the value by its kind. The palette is generated with two enforced rules (see below).
+- **The neon palette and colour scheme.** Menus colour by what an item *is* — tags one colour, Bluetooth another, passive monitors another — with a floor of 35° of hue between any two colours used in the same menu, so no submenu reads as one flat colour. The attack menus are grouped by mechanism: beacon/frame spam, floods and disruption, rogue-AP and social attacks, and (on the Bluetooth side) Apple pop-up spam and tag attacks. Data screens dim the field name and colour the value by its kind.
 - **The boot splash.** A synthwave sunset with the CYBERPUNK EDITION wordmark, drawn from a table of horizontal runs (~1.7 KB) rather than a pixel buffer (~18 KB).
-- **Screen brightness on the Mini v3.** Upstream has the setting and a PWM backlight, but both sit behind `#ifndef HAS_MINI_SCREEN` because its brightness screen is touch-driven — and this board's switch is a 5-way tactile control.
+
+### Screen brightness
+
+**Device → Brightness.** Up/right brightens, down/left dims, and the centre button saves and returns. The change applies to the backlight as you move, so you can see the level you are choosing, and it is written to NVS only on save, so it survives a reboot.
+
+Upstream has this setting and a PWM backlight path, but **both are behind `#ifndef HAS_MINI_SCREEN`**, because its brightness screen is touch-driven — "tap the top to brighten" — and this board has no touch panel at all. This is the same feature rebuilt for the 5-way tactile switch:
+
+- the PWM/LEDC path now covers the Mini v3 as well as the full-screen targets; the other mini screens keep their plain on/off fallback, having no dimmable backlight pin
+- the Mini v3 backlight is **active low**, so the PWM duty is inverted — otherwise every level would run backwards
+- the level table, the LEDC API differences and that inversion live in one place, guarded so no other board's behaviour changes
 
 ### The palette, and the two rules behind it
 
@@ -69,7 +78,9 @@ Both rules are enforced by the generator (`tools/generate_neon_palette.py`) rath
 
 ## Flash it
 
-**[Open the web flasher](https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/)** in Chrome or Edge (Web Serial needs a Chromium browser), plug the board in over USB-C, and pick the port.
+### <a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/" target="_blank" rel="noopener">Open the web flasher &rarr;</a>
+
+Opens in a new tab. Use **Chrome** or **Edge** (Web Serial needs a Chromium browser), plug the board in over USB-C, and pick the port.
 
 - **Application update** — replaces the app only. **Keeps your settings**, saved WiFi, and Evil Portal templates. Use this one.
 - **Full install (factory image)** — writes the whole 8 MB flash. For a blank or unknown board; wipes settings.

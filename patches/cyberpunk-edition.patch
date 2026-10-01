@@ -1,9 +1,9 @@
 diff --git a/MINI_V3_COSMO.md b/MINI_V3_COSMO.md
 new file mode 100644
-index 0000000..79d2dcd
+index 0000000..e93cdf4
 --- /dev/null
 +++ b/MINI_V3_COSMO.md
-@@ -0,0 +1,471 @@
+@@ -0,0 +1,474 @@
 +# Marauder Mini v3 — "Cosmo" firmware build
 +
 +This is **ESP32 Marauder v1.17.0** with one behavioural fix applied to the
@@ -107,7 +107,7 @@ index 0000000..79d2dcd
 +| report | cause | fix |
 +|---|---|---|
 +| WiFi and Bluetooth counters same colour while wardriving | the palette's "success" colour was mint `#3FE8B0`, 27 degrees of hue from the accent cyan `#4FE3EE` the BT counter used - indistinguishable at 16 px | success is now a true green, Bluetooth has its own purple family, and the generator refuses any palette with two saturated entries within 30 degrees of hue |
-+| not enough colour variety, inconsistent | a menu of one kind was a rainbow of one-off colours | 185 `addNodes` colours repainted by family: scanners cyan, sniffers pale cyan, attacks red, Bluetooth purple, GPS green, files orange, choices yellow, fox hunt lime, settings neutral, Back rows de-emphasised |
++| not enough colour variety, inconsistent | a menu of one kind was a rainbow of one-off colours, or (after the first attempt at fixing that) one flat colour for the whole menu | 185 `addNodes` colours repainted by family, then refined so no menu uses fewer than two colours: scanners cyan, sniffers pale cyan, attacks split by mechanism (spam red, floods magenta, rogue-AP yellow), Bluetooth purple, GPS green, files orange, choices yellow, fox hunt lime, settings neutral, Back rows de-emphasised |
 +| GPS screens cut the text off | the date/time and UTC stamps (23-24 chars) went through single-line prints on a 21-character panel | every GPS data line now wraps; the row budget is asserted by `test_gps_layout` so a field added later fails a test instead of disappearing |
 +| battery indicator | this board defines no battery source at all, and its IP5306's I2C pins are not documented anywhere public | **not implemented - an attempt was reverted, see below.** Bootloader and everything else unaffected |
 +
@@ -227,7 +227,10 @@ index 0000000..79d2dcd
 +| main menu | Recon magenta, WiFi green, Bluetooth purple, GPS green, Device blue |
 +| WiFi scanners / AP lists | cyan |
 +| WiFi sniffers, probe/station select | pale cyan |
-+| anything that transmits - attacks, spam, Evil Portal | red |
++| anything that transmits - beacon and frame spam | red |
++| attacks that flood or disrupt (deauth, SAE, assoc sleep, channel switch) | magenta |
++| rogue-AP and social attacks (Evil Portal, Karma, Bad Msg) | yellow |
++| BLE: Apple pop-up spam / tag attacks (Spoof Airtag, FindMy Sound) | lime / magenta |
 +| Bluetooth (menus and sniffers) | purple |
 +| GPS, wardriving, geofences | green |
 +| files, SD, save/load/upload | orange |
@@ -2472,7 +2475,7 @@ index 338d3eb..3732046 100644
    #ifndef GPS_NMEA_SCRNWRAP
      #define GPS_NMEA_SCRNWRAP true
 diff --git a/esp32_marauder/MenuFunctions.cpp b/esp32_marauder/MenuFunctions.cpp
-index da0ac51..a2ed926 100644
+index da0ac51..09ce91d 100644
 --- a/esp32_marauder/MenuFunctions.cpp
 +++ b/esp32_marauder/MenuFunctions.cpp
 @@ -29,11 +29,11 @@ void MenuFunctions::drawMiniMenuButton(int b, int x, bool selected, uint16_t tex
@@ -2874,7 +2877,7 @@ index da0ac51..a2ed926 100644
        });
  
 -      this->addNodes(&uploadLogsMenu, "Delete Wardrive Logs", TFTORANGE, 0, [this]() {
-+      this->addNodes(&uploadLogsMenu, "Delete Wardrive Logs", TFTRED, 0, [this]() {
++      this->addNodes(&uploadLogsMenu, "Delete Wardrive Logs", TFTMAGENTA, 0, [this]() {
          this->changeMenu(&deleteAllMenu, true);
        });
  
@@ -3310,14 +3313,15 @@ index da0ac51..a2ed926 100644
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_RICK_ROLL, TFT_YELLOW);
 +    wifi_scan_obj.StartScan(WIFI_ATTACK_RICK_ROLL, NEON_YELLOW);
    });
-   this->addNodes(&wifiAttackMenu, text_table1[53], TFTRED, PROBE_SNIFF, [this]() {
+-  this->addNodes(&wifiAttackMenu, text_table1[53], TFTRED, PROBE_SNIFF, [this]() {
++  this->addNodes(&wifiAttackMenu, text_table1[53], TFTMAGENTA, PROBE_SNIFF, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_AUTH, TFT_RED);
 +    wifi_scan_obj.StartScan(WIFI_ATTACK_AUTH, NEON_RED);
    });
 -  this->addNodes(&wifiAttackMenu, "Evil Portal", TFTORANGE, BEACON_SNIFF, [this]() {
-+  this->addNodes(&wifiAttackMenu, "Evil Portal", TFTRED, BEACON_SNIFF, [this]() {
++  this->addNodes(&wifiAttackMenu, "Evil Portal", TFTYELLOW, BEACON_SNIFF, [this]() {
  
      wifiAPMenu.list->clear();
      ssidsMenu.list->clear();
@@ -3352,8 +3356,12 @@ index da0ac51..a2ed926 100644
            wifi_scan_obj.setMac();
          }
          else
-@@ -2510,23 +2522,23 @@ void MenuFunctions::RunSetup()
-   this->addNodes(&wifiAttackMenu, text_table1[54], TFTRED, DEAUTH_SNIFF, [this]() {
+@@ -2507,26 +2519,26 @@ void MenuFunctions::RunSetup()
+     }
+     this->changeMenu(&evilPortalMenu, true);
+   });
+-  this->addNodes(&wifiAttackMenu, text_table1[54], TFTRED, DEAUTH_SNIFF, [this]() {
++  this->addNodes(&wifiAttackMenu, text_table1[54], TFTMAGENTA, DEAUTH_SNIFF, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH, TFT_RED);
@@ -3366,7 +3374,8 @@ index da0ac51..a2ed926 100644
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_AP_SPAM, TFT_MAGENTA);
 +    wifi_scan_obj.StartScan(WIFI_ATTACK_AP_SPAM, NEON_MAGENTA);
    });
-   this->addNodes(&wifiAttackMenu, text_table1[62], TFTRED, DEAUTH_SNIFF, [this]() {
+-  this->addNodes(&wifiAttackMenu, text_table1[62], TFTRED, DEAUTH_SNIFF, [this]() {
++  this->addNodes(&wifiAttackMenu, text_table1[62], TFTMAGENTA, DEAUTH_SNIFF, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH_TARGETED, TFT_ORANGE);
@@ -3374,7 +3383,7 @@ index da0ac51..a2ed926 100644
    });
  
 -  this->addNodes(&wifiAttackMenu, "Karma", TFTORANGE, KEYBOARD_ICO, [this](){
-+  this->addNodes(&wifiAttackMenu, "Karma", TFTRED, KEYBOARD_ICO, [this](){
++  this->addNodes(&wifiAttackMenu, "Karma", TFTYELLOW, KEYBOARD_ICO, [this](){
      // Add the back button
      selectProbeSSIDsMenu.list->clear();
 -    this->addNodes(&selectProbeSSIDsMenu, text09, TFTLIGHTGREY, 0, [this]() {
@@ -3391,48 +3400,52 @@ index da0ac51..a2ed926 100644
            wifi_scan_obj.setMac();
          }
          else
-@@ -2550,76 +2562,76 @@ void MenuFunctions::RunSetup()
-   this->addNodes(&wifiAttackMenu, "Bad Msg", TFTRED, DEAUTH_SNIFF, [this]() {
+@@ -2547,79 +2559,79 @@ void MenuFunctions::RunSetup()
+     this->changeMenu(&selectProbeSSIDsMenu, true);
+   });
+ 
+-  this->addNodes(&wifiAttackMenu, "Bad Msg", TFTRED, DEAUTH_SNIFF, [this]() {
++  this->addNodes(&wifiAttackMenu, "Bad Msg", TFTYELLOW, DEAUTH_SNIFF, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_BAD_MSG, TFT_RED);
 +    wifi_scan_obj.StartScan(WIFI_ATTACK_BAD_MSG, NEON_RED);
    });
--  this->addNodes(&wifiAttackMenu, "Bad Msg Targeted", TFTYELLOW, DEAUTH_SNIFF, [this]() {
-+  this->addNodes(&wifiAttackMenu, "Bad Msg Targeted", TFTRED, DEAUTH_SNIFF, [this]() {
+   this->addNodes(&wifiAttackMenu, "Bad Msg Targeted", TFTYELLOW, DEAUTH_SNIFF, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_BAD_MSG_TARGETED, TFT_YELLOW);
 +    wifi_scan_obj.StartScan(WIFI_ATTACK_BAD_MSG_TARGETED, NEON_YELLOW);
    });
-   this->addNodes(&wifiAttackMenu, "Assoc Sleep", TFTRED, DEAUTH_SNIFF, [this]() {
+-  this->addNodes(&wifiAttackMenu, "Assoc Sleep", TFTRED, DEAUTH_SNIFF, [this]() {
++  this->addNodes(&wifiAttackMenu, "Assoc Sleep", TFTMAGENTA, DEAUTH_SNIFF, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_SLEEP, TFT_RED);
 +    wifi_scan_obj.StartScan(WIFI_ATTACK_SLEEP, NEON_RED);
    });
--  this->addNodes(&wifiAttackMenu, "Assoc Sleep Targ", TFTMAGENTA, DEAUTH_SNIFF, [this]() {
-+  this->addNodes(&wifiAttackMenu, "Assoc Sleep Targ", TFTRED, DEAUTH_SNIFF, [this]() {
+   this->addNodes(&wifiAttackMenu, "Assoc Sleep Targ", TFTMAGENTA, DEAUTH_SNIFF, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_SLEEP_TARGETED, TFT_MAGENTA);
 +    wifi_scan_obj.StartScan(WIFI_ATTACK_SLEEP_TARGETED, NEON_MAGENTA);
    });
 -  this->addNodes(&wifiAttackMenu, "SAE Commit Flood", TFTLIME, EAPOL, [this]() {
-+  this->addNodes(&wifiAttackMenu, "SAE Commit Flood", TFTRED, EAPOL, [this]() {
++  this->addNodes(&wifiAttackMenu, "SAE Commit Flood", TFTMAGENTA, EAPOL, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_SAE_COMMIT, TFT_GREEN);
 +    wifi_scan_obj.StartScan(WIFI_ATTACK_SAE_COMMIT, NEON_GREEN);
    });
 -  this->addNodes(&wifiAttackMenu, "Channel Switch", TFTORANGE, BEACON_LIST, [this]() {
-+  this->addNodes(&wifiAttackMenu, "Channel Switch", TFTRED, BEACON_LIST, [this]() {
++  this->addNodes(&wifiAttackMenu, "Channel Switch", TFTMAGENTA, BEACON_LIST, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_CSA, TFT_GREEN);
 +    wifi_scan_obj.StartScan(WIFI_ATTACK_CSA, NEON_GREEN);
    });
-   this->addNodes(&wifiAttackMenu, "Quiet Time", TFTRED, BEACON_LIST, [this]() {
+-  this->addNodes(&wifiAttackMenu, "Quiet Time", TFTRED, BEACON_LIST, [this]() {
++  this->addNodes(&wifiAttackMenu, "Quiet Time", TFTMAGENTA, BEACON_LIST, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(WIFI_ATTACK_QUIET, TFT_GREEN);
@@ -3510,17 +3523,17 @@ index da0ac51..a2ed926 100644
      });
    #endif
 -  this->addNodes(&wifiGeneralMenu, text_table1[28], TFTSILVER, CLEAR_ICO, [this]() {
-+  this->addNodes(&wifiGeneralMenu, text_table1[28], TFTRED, CLEAR_ICO, [this]() {
++  this->addNodes(&wifiGeneralMenu, text_table1[28], TFTMAGENTA, CLEAR_ICO, [this]() {
      this->changeMenu(&clearSSIDsMenu, true);
      wifi_scan_obj.RunClearSSIDs();
    });
 -  this->addNodes(&wifiGeneralMenu, text_table1[29], TFTDARKGREY, CLEAR_ICO, [this]() {
-+  this->addNodes(&wifiGeneralMenu, text_table1[29], TFTRED, CLEAR_ICO, [this]() {
++  this->addNodes(&wifiGeneralMenu, text_table1[29], TFTMAGENTA, CLEAR_ICO, [this]() {
      this->changeMenu(&clearAPsMenu, true);
      wifi_scan_obj.RunClearAPs();
    });
 -  this->addNodes(&wifiGeneralMenu, text_table1[60], TFTBLUE, CLEAR_ICO, [this]() {
-+  this->addNodes(&wifiGeneralMenu, text_table1[60], TFTRED, CLEAR_ICO, [this]() {
++  this->addNodes(&wifiGeneralMenu, text_table1[60], TFTMAGENTA, CLEAR_ICO, [this]() {
      this->changeMenu(&clearAPsMenu, true);
      wifi_scan_obj.RunClearStations();
    });
@@ -4054,14 +4067,14 @@ index da0ac51..a2ed926 100644
      this->changeMenu(bluetoothAttackMenu.parentMenu, true);
    });
 -  this->addNodes(&bluetoothAttackMenu, "Sour Apple", TFTGREEN, DEAUTH_SNIFF, [this]() {
-+  this->addNodes(&bluetoothAttackMenu, "Sour Apple", TFTRED, DEAUTH_SNIFF, [this]() {
++  this->addNodes(&bluetoothAttackMenu, "Sour Apple", TFTLIME, DEAUTH_SNIFF, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(BT_ATTACK_SOUR_APPLE, TFT_GREEN);
 +    wifi_scan_obj.StartScan(BT_ATTACK_SOUR_APPLE, NEON_GREEN);
    });
 -  this->addNodes(&bluetoothAttackMenu, "Apple Juice", TFTYELLOW, DEAUTH_SNIFF, [this]() {
-+  this->addNodes(&bluetoothAttackMenu, "Apple Juice", TFTRED, DEAUTH_SNIFF, [this]() {
++  this->addNodes(&bluetoothAttackMenu, "Apple Juice", TFTLIME, DEAUTH_SNIFF, [this]() {
      display_obj.clearScreen();
      this->drawStatusBar();
 -    wifi_scan_obj.StartScan(BT_ATTACK_APPLE_JUICE, TFT_YELLOW);
@@ -4107,7 +4120,7 @@ index da0ac51..a2ed926 100644
    //#ifndef HAS_ILI9341
      #ifdef HAS_BT
 -      this->addNodes(&bluetoothAttackMenu, "Spoof Airtag", TFTWHITE, ATTACKS, [this](){
-+      this->addNodes(&bluetoothAttackMenu, "Spoof Airtag", TFTRED, ATTACKS, [this](){
++      this->addNodes(&bluetoothAttackMenu, "Spoof Airtag", TFTMAGENTA, ATTACKS, [this](){
            wifiAPMenu.parentMenu = &bluetoothAttackMenu;
  
            // Clear nodes and add back button
@@ -4140,7 +4153,7 @@ index da0ac51..a2ed926 100644
  
        #ifdef HAS_NIMBLE_2
 -      this->addNodes(&bluetoothAttackMenu, "FindMy Sound", TFTCYAN, ATTACKS, [this](){
-+      this->addNodes(&bluetoothAttackMenu, "FindMy Sound", TFTRED, ATTACKS, [this](){
++      this->addNodes(&bluetoothAttackMenu, "FindMy Sound", TFTMAGENTA, ATTACKS, [this](){
            wifiAPMenu.parentMenu = &bluetoothAttackMenu;
  
            // Clear nodes and add back button
