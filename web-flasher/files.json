@@ -1,0 +1,42 @@
+{
+  "version": "v1.17.0-cyberpunk-edition",
+  "chipFamily": "ESP32-C5",
+  "flashSize": 8388608,
+  "files": [
+    {
+      "role": "bootloader",
+      "offset": 8192,
+      "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-bootloader.bin",
+      "size": 20784,
+      "sha256": "f0cc3970dbf6001eb398e589244047f0731acbc0ded1ccfa952cd7559c083b13"
+    },
+    {
+      "role": "partition-table",
+      "offset": 32768,
+      "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-partition-table.bin",
+      "size": 3072,
+      "sha256": "1d9cca96de0fe07ad7fc0648b9878ddecd9ce565e38b589ad20fea698ed4c80c"
+    },
+    {
+      "role": "ota-data",
+      "offset": 57344,
+      "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-ota-data.bin",
+      "size": 8192,
+      "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+    },
+    {
+      "role": "application",
+      "offset": 65536,
+      "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-application.bin",
+      "size": 2010064,
+      "sha256": "b8123c673909e2828542fc1e09ae04102e3f77a0afff91cb76e9c1186098c9b2"
+    },
+    {
+      "role": "merged-factory",
+      "offset": 0,
+      "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-factory-8MB.bin",
+      "size": 8388608,
+      "sha256": "92954773c69b065dc1e63eab0bd07963d2588515cf77e8d4c13c6ed719f0d12d"
+    }
+  ]
+}

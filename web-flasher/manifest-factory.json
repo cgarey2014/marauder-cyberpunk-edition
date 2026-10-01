@@ -1,0 +1,28 @@
+{
+  "name": "ESP32 Marauder Mini v3 - Cyberpunk Edition (full install)",
+  "version": "v1.17.0-cyberpunk-edition",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C5",
+      "parts": [
+        {
+          "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-bootloader.bin",
+          "offset": 8192
+        },
+        {
+          "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-partition-table.bin",
+          "offset": 32768
+        },
+        {
+          "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-ota-data.bin",
+          "offset": 57344
+        },
+        {
+          "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-application.bin",
+          "offset": 65536
+        }
+      ]
+    }
+  ]
+}

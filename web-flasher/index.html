@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marauder Mini v3 &mdash; Cyberpunk Edition firmware flasher</title>
+<style>
+  :root {
+    /* The same palette the firmware draws with. */
+    --bg: #0a0618;
+    --surface: #140b2b;
+    --surface-2: #1b1035;
+    --line: #2a1b4a;
+    --fg: #eaf7ff;
+    --muted: #93a2c0;
+    --cyan: #4fe3ee;
+    --magenta: #ed4fd0;
+    --amber: #ffe633;
+    --ok: #4dff7a;
+    --warn: #ff8c55;
+    --red: #ff3355;
+    --blue: #7fa8ff;
+    --lime: #a6f53c;
+    --purple: #b071f0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  header { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 32px; }
+
+  .eyebrow {
+    color: var(--cyan);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 10px; letter-spacing: -.01em; }
+
+  .mark {
+    display: inline-block;
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lede { color: var(--muted); margin: 0; max-width: 60ch; }
+
+  h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: var(--muted);
+    margin: 40px 0 14px;
+    font-weight: 700;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 16px;
+  }
+
+  .card.recommended { border-color: #2b5b57; }
+
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: 2px;
+  }
+  .tag.keeps { background: rgba(61,220,132,.14); color: var(--ok); }
+  .tag.erases { background: rgba(255,159,67,.14); color: var(--warn); }
+
+  .card p { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+
+  esp-web-install-button { display: inline-block; }
+
+  esp-web-install-button::part(button) {
+    background: var(--cyan);
+    color: #06201e;
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  esp-web-install-button[install-unsupported]::part(button) {
+    background: var(--surface-2);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  .button-note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+
+  ol, ul { padding-left: 20px; color: var(--muted); font-size: 14px; }
+  li { margin-bottom: 7px; }
+  li strong { color: var(--fg); font-weight: 600; }
+
+  code {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--fg);
+  }
+
+  pre {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 13px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  pre code { background: none; border: 0; padding: 0; }
+
+  .callout {
+    border-left: 3px solid var(--cyan);
+    background: var(--surface);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout strong { color: var(--fg); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  td.hash { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--muted); word-break: break-all; }
+  td.num { text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  footer { margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+  a { color: var(--cyan); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Marauder Mini v3 &middot; ESP32-C5</p>
+    <h1>Firmware flasher for <span class="mark">Cyberpunk Edition</span></h1>
+    <p class="lede">
+      Flashes the neon-rethemed, 128&nbsp;px text-fitting build of ESP32 Marauder straight
+      from your browser. No toolchain, no drivers, no command line &mdash; the page talks
+      to the board over USB.
+    </p>
+    <p class="lede" style="font-size:14px">
+      Built on <strong>ESP32 Marauder v1.17.0</strong> by
+      <a href="https://github.com/justcallmekoko/ESP32Marauder">justcallmekoko</a> &mdash;
+      see <a href="https://github.com/cgarey2014/marauder-cyberpunk-edition">the repository</a>
+      for the full change list, the source, and the licence.
+    </p>
+  </header>
+
+  <h2>What this build changes</h2>
+  <div class="card">
+    <ul style="margin:0">
+      <li><strong>MAC addresses are no longer cut off.</strong> Lines longer than the
+          21 characters the 128&nbsp;px panel can show wrap onto the row below instead of
+          being clipped, so "BSSID: AA:BB:CC:DD:EE:FF" is readable in full.</li>
+      <li><strong>Follow / device list shows the whole address</strong> rather than only
+          the second half of it.</li>
+      <li><strong>Long screen titles fit.</strong> Titles drawn in the large font drop to
+          the small font when they would overrun the panel.</li>
+      <li><strong>GPS screens read in full.</strong> The date/time and UTC stamps were
+          being cut off mid-string; every GPS line wraps now, and so do the 60&ndash;80
+          character NMEA sentences on the raw NMEA screen.</li>
+      <li><strong>Colour that means something.</strong> Menus colour by what an item
+          <em>is</em> &mdash; tags one colour, Bluetooth another, passive monitors another,
+          attacks another &mdash; so like items match and no submenu is one flat colour.
+          On data screens the field name is dimmed and the value is coloured by its kind,
+          so a screen of readings can be skimmed by shape.</li>
+      <li><strong>New boot screen:</strong> a synthwave sunset with a neon skyline and the
+          <strong>CYBERPUNK EDITION</strong> wordmark over "Jacking in...".</li>
+      <li><strong>Neon cyberpunk palette</strong> derived from a reference image, on black
+          with a deep indigo status bar. Every colour is checked against a contrast floor
+          by the generator, so no text is left unreadable.</li>
+      <li><strong>Screen brightness is adjustable:</strong> <strong>Device &gt; Brightness</strong>.
+          Up/right brightens, down/left dims, centre saves. The level persists.</li>
+      <li><strong>Status bar shows more:</strong> GPS in three states &mdash; no module,
+          no fix yet, or a fix &mdash; and SD green or red.</li>
+    </ul>
+    <p style="margin:14px 0 0">
+      Nothing else was changed. Every tweak is gated on the Mini v3 target: on every
+      other board each colour name resolves to the stock value, so no other board's
+      colours or behaviour change. The flash layout is byte-identical to the official
+      v1.17.0 Mini v3 release.
+    </p>
+  </div>
+
+  <h2>Flash it</h2>
+
+  <div class="card recommended">
+    <h3>Application update<span class="tag keeps">keeps your settings</span></h3>
+    <p>
+      Writes the firmware into the application slot at <code>0x10000</code> and points the
+      OTA data at it. Your saved preferences, WiGLE / WDG credentials, Evil Portal
+      templates and logs are left alone. Use this one.
+    </p>
+    <esp-web-install-button id="update-button" manifest="manifest-update.json"></esp-web-install-button>
+    <p class="button-note" id="update-note">
+      Chrome or Edge on desktop. Nothing appears? Check the requirements below.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Full install<span class="tag erases">erases settings</span></h3>
+    <p>
+      Writes the bootloader, partition table, OTA data and application. Use this for a
+      blank board, or if an update will not boot. This one replaces everything on the
+      flash, including stored settings and logs.
+    </p>
+    <esp-web-install-button id="factory-button" manifest="manifest-factory.json"></esp-web-install-button>
+  </div>
+
+  <h2>How to do it</h2>
+  <div class="card">
+    <ol style="margin:0">
+      <li>Use <strong>Chrome</strong> or <strong>Edge</strong> on a desktop &mdash; Firefox and
+          Safari cannot talk to USB serial.</li>
+      <li>Serve this folder over HTTP; Web Serial is only available on
+          <code>https://</code> or <code>http://localhost</code>. See below.</li>
+      <li>Plug the Mini v3 in with a <strong>data-capable USB-C cable</strong>.</li>
+      <li>Click an install button and pick the board's serial port. It usually shows up
+          as <code>USB JTAG/serial debug unit</code> or <code>USB Serial Device</code>.</li>
+      <li>If no port appears, unplug, then hold <strong>BOOT</strong> while plugging it
+          back in to force download mode.</li>
+      <li>Wait for 100%, then the board reboots on its own. If it stays dark, press the
+          reset button.</li>
+    </ol>
+  </div>
+
+  <h2>Running this page</h2>
+  <div class="callout">
+    Opening the file directly from Finder will <strong>not</strong> work &mdash; browsers block
+    USB serial on <code>file://</code>. From a terminal, in this folder:
+    <pre><code>python3 -m http.server 8000</code></pre>
+    then open <code>http://localhost:8000/</code>.
+  </div>
+
+  <h2>Other ways to flash</h2>
+  <div class="card">
+    <p style="margin-bottom:10px">
+      The merged single-file image in <code>firmware/</code> can be written at offset
+      <code>0x0</code> with Espressif's Flash Download Tool, or with esptool:
+    </p>
+    <pre><code>esptool.py --chip esp32c5 --port /dev/cu.usbmodemXXXX write_flash 0x0 \
+  firmware/marauder-mini-v3-*-factory-8MB.bin</code></pre>
+    <p style="margin:14px 0 0">
+      To go back to the stock firmware, flash the official
+      <a href="https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v1.17.0">v1.17.0
+      Mini v3 release</a> with the same method.
+    </p>
+  </div>
+
+  <h2>Files and checksums</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>File</th><th style="text-align:right">Bytes</th><th>Offset</th><th>SHA-256</th></tr>
+      </thead>
+      <tbody id="checksum-body">
+        <tr><td colspan="4" style="color:var(--muted)">Loading checksums&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    Built from <a href="https://github.com/justcallmekoko/ESP32Marauder">justcallmekoko/ESP32Marauder</a>
+    v1.17.0 (MIT). Panel configuration and flash layout follow the published Mini v3
+    target. Flashing replaces the firmware on your device &mdash; you do it at your own risk.
+  </footer>
+
+</div>
+
+<script type="module" src="./vendor/esp-web-tools/install-button.js"></script>
+<script>
+  // Report the two platform requirements up front rather than letting the user
+  // click a dead button: Web Serial, and a secure context for it to exist in.
+  const hasSerial = "serial" in navigator;
+  const secure = window.isSecureContext;
+
+  if (!hasSerial) {
+    document.querySelectorAll("esp-web-install-button").forEach((button) => {
+      button.setAttribute("install-unsupported", "");
+    });
+    document.getElementById("update-note").innerHTML =
+      "This browser has no Web Serial support. Use Chrome or Edge on a desktop.";
+  } else if (!secure) {
+    document.getElementById("update-note").innerHTML =
+      "USB access is blocked on <code>file://</code>. Serve this folder over " +
+      "<code>http://localhost</code> and reload &mdash; see below.";
+  } else {
+    document.getElementById("update-note").innerHTML =
+      "Pick the board's serial port when the browser asks.";
+  }
+
+  fetch("files.json")
+    .then((response) => {
+      if (!response.ok) throw new Error("missing files.json");
+      return response.json();
+    })
+    .then((data) => {
+      const offsets = data.files.reduce((acc, file) => {
+        acc[file.path] = "0x" + file.offset.toString(16).toUpperCase();
+        return acc;
+      }, {});
+
+      document.getElementById("checksum-body").innerHTML = data.files
+        .map((file) => {
+          const name = file.path.replace(/^firmware\//, "");
+          return `<tr><td>${name}</td>` +
+                 `<td class="num">${file.size.toLocaleString("en-US")}</td>` +
+                 `<td>${offsets[file.path]}</td>` +
+                 `<td class="hash">${file.sha256}</td></tr>`;
+        })
+        .join("");
+    })
+    .catch(() => {
+      document.getElementById("checksum-body").innerHTML =
+        '<tr><td colspan="4" style="color:var(--muted)">' +
+        "No firmware assets yet &mdash; run tools/package_mini_v3_flasher.py " +
+        "after building.</td></tr>";
+    });
+</script>
+</body>
+</html>

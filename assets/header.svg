@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="Marauder Mini v3 - Cyberpunk Edition">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0A0618"/>
+      <stop offset="55%" stop-color="#1B1035"/>
+      <stop offset="100%" stop-color="#2A0F3D"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFE633"/>
+      <stop offset="45%" stop-color="#FF8C55"/>
+      <stop offset="100%" stop-color="#FF3355"/>
+    </linearGradient>
+    <linearGradient id="wordmark" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4FE3EE"/>
+      <stop offset="45%" stop-color="#4DFF7A"/>
+      <stop offset="100%" stop-color="#ED4FD0"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softglow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="horizon">
+      <rect x="0" y="150" width="1200" height="170"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1200" height="320" fill="url(#sky)"/>
+
+  <!-- stars -->
+  <g fill="#EAF7FF" opacity="0.85">
+    <circle cx="90" cy="34" r="1.6"/><circle cx="210" cy="62" r="1.2"/>
+    <circle cx="332" cy="26" r="1.4"/><circle cx="470" cy="54" r="1.1"/>
+    <circle cx="604" cy="30" r="1.5"/><circle cx="742" cy="58" r="1.2"/>
+    <circle cx="880" cy="24" r="1.4"/><circle cx="1010" cy="48" r="1.2"/>
+    <circle cx="1128" cy="30" r="1.6"/><circle cx="150" cy="104" r="1.1"/>
+    <circle cx="560" cy="92" r="1.2"/><circle cx="980" cy="96" r="1.1"/>
+  </g>
+
+  <!-- sun -->
+  <circle cx="600" cy="196" r="96" fill="url(#sun)" opacity="0.95"/>
+  <g stroke="#1B1035" stroke-width="5" opacity="0.9">
+    <line x1="504" y1="176" x2="696" y2="176"/>
+    <line x1="504" y1="194" x2="696" y2="194"/>
+    <line x1="504" y1="212" x2="696" y2="212"/>
+    <line x1="504" y1="230" x2="696" y2="230"/>
+    <line x1="504" y1="248" x2="696" y2="248"/>
+    <line x1="504" y1="266" x2="696" y2="266"/>
+  </g>
+
+  <!-- horizon grid -->
+  <g clip-path="url(#horizon)" stroke="#ED4FD0" stroke-width="1.4" opacity="0.55">
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="222" x2="1200" y2="222"/>
+    <line x1="0" y1="248" x2="1200" y2="248"/>
+    <line x1="0" y1="278" x2="1200" y2="278"/>
+    <line x1="0" y1="312" x2="1200" y2="312"/>
+    <line x1="600" y1="150" x2="600" y2="320"/>
+    <line x1="600" y1="150" x2="360" y2="320"/>
+    <line x1="600" y1="150" x2="840" y2="320"/>
+    <line x1="600" y1="150" x2="150" y2="320"/>
+    <line x1="600" y1="150" x2="1050" y2="320"/>
+    <line x1="600" y1="150" x2="-60" y2="320"/>
+    <line x1="600" y1="150" x2="1260" y2="320"/>
+  </g>
+  <line x1="0" y1="150" x2="1200" y2="150" stroke="#4FE3EE" stroke-width="2" opacity="0.9" filter="url(#softglow)"/>
+
+  <!-- city skyline -->
+  <g fill="#140B2B" opacity="0.98">
+    <rect x="20" y="112" width="54" height="38"/><rect x="86" y="96" width="38" height="54"/>
+    <rect x="136" y="126" width="62" height="24"/><rect x="212" y="104" width="44" height="46"/>
+    <rect x="268" y="132" width="40" height="18"/><rect x="320" y="90" width="52" height="60"/>
+    <rect x="386" y="120" width="36" height="30"/><rect x="434" y="108" width="48" height="42"/>
+    <rect x="496" y="128" width="34" height="22"/><rect x="668" y="124" width="42" height="26"/>
+    <rect x="722" y="106" width="46" height="44"/><rect x="780" y="128" width="38" height="22"/>
+    <rect x="830" y="98" width="50" height="52"/><rect x="892" y="122" width="36" height="28"/>
+    <rect x="940" y="110" width="44" height="40"/><rect x="996" y="130" width="40" height="20"/>
+    <rect x="1048" y="102" width="52" height="48"/><rect x="1112" y="126" width="60" height="24"/>
+  </g>
+  <g fill="#FFE633" opacity="0.9">
+    <rect x="30" y="122" width="4" height="4"/><rect x="44" y="134" width="4" height="4"/>
+    <rect x="96" y="108" width="4" height="4"/><rect x="110" y="126" width="4" height="4"/>
+    <rect x="332" y="102" width="4" height="4"/><rect x="346" y="120" width="4" height="4"/>
+    <rect x="446" y="120" width="4" height="4"/><rect x="734" y="118" width="4" height="4"/>
+    <rect x="748" y="134" width="4" height="4"/><rect x="842" y="110" width="4" height="4"/>
+    <rect x="856" y="128" width="4" height="4"/><rect x="1060" y="114" width="4" height="4"/>
+    <rect x="1074" y="132" width="4" height="4"/>
+  </g>
+
+  <!-- wordmark -->
+  <g filter="url(#glow)">
+    <text x="600" y="238" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="86" font-weight="700" letter-spacing="10" fill="url(#wordmark)">CYBERPUNK</text>
+  </g>
+  <text x="600" y="286" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+        font-size="34" font-weight="700" letter-spacing="16" fill="#ED4FD0" filter="url(#softglow)">EDITION</text>
+
+  <!-- corner labels -->
+  <text x="34" y="40" font-family="ui-monospace, Menlo, monospace" font-size="20" letter-spacing="3" fill="#4FE3EE">ESP32-C5</text>
+  <text x="1166" y="40" text-anchor="end" font-family="ui-monospace, Menlo, monospace" font-size="20" letter-spacing="3" fill="#4DFF7A">MARAUDER MINI v3</text>
+  <text x="34" y="304" font-family="ui-monospace, Menlo, monospace" font-size="17" letter-spacing="2" fill="#93A2C0">128x128 · dual-band · forked from ESP32 Marauder by justcallmekoko</text>
+</svg>
