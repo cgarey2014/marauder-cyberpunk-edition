@@ -2,14 +2,26 @@
 
 <img src="assets/header.svg" alt="Marauder Mini v3 — Cyberpunk Edition" width="100%">
 
+<br>
+
+<a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/">
+<img src="https://img.shields.io/badge/%E2%96%B6%20%20FLASH%20THE%20FIRMWARE-Cyberpunk%20Edition-ED4FD0?style=for-the-badge&labelColor=140B2B" alt="Flash the firmware from your browser" height="44">
+</a>
+
+### <a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/">→ Open the web flasher</a>
+
+**Chrome or Edge → plug the Mini v3 in over USB-C → pick the port.** Nothing to install, no
+toolchain, no drivers — the firmware is written straight from the browser over USB.
+
+Tick **Application update** and your settings, saved WiFi and Evil Portal templates are kept.
+A full-install image is there too, for a blank board.
+
 ### A neon retheme and 128 px text-fitting rebuild of **ESP32 Marauder**, for the Marauder Mini v3.
 
 [![Upstream](https://img.shields.io/badge/upstream-ESP32Marauder-4FE3EE?style=for-the-badge&labelColor=140B2B)](https://github.com/justcallmekoko/ESP32Marauder)
 [![Board](https://img.shields.io/badge/board-Mini%20v3%20%C2%B7%20ESP32--C5-4DFF7A?style=for-the-badge&labelColor=140B2B)](#what-this-is)
 [![Base](https://img.shields.io/badge/base-v1.17.0-FFE633?style=for-the-badge&labelColor=140B2B)](#what-changed)
 [![License](https://img.shields.io/badge/license-MIT-ED4FD0?style=for-the-badge&labelColor=140B2B)](LICENSE)
-
-**Flash it from your browser** → <a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/" target="_blank" rel="noopener"><strong>open the web flasher</strong></a>
 
 </div>
 
@@ -19,7 +31,7 @@
 
 A personal build of [justcallmekoko's ESP32 Marauder](https://github.com/justcallmekoko/ESP32Marauder) for **one board**: the **Marauder Mini v3**, the ESP32-C5 generation with a 128 × 128 ST7735 panel.
 
-It exists because the stock firmware targets that panel without quite fitting it — long values were clipped mid-string, and the interface is monochrome enough that a screen of data is hard to read at a glance. This build fixes the fitting, gives the UI a neon cyberpunk palette derived from a reference image, and makes colour mean something.
+It exists because the stock firmware targets that panel without quite fitting it — long values were clipped mid-string, and the interface is monochrome enough that a screen of data is hard to read at a glance. This build fixes the fitting, gives the UI a neon cyberpunk palette derived from a reference image, and makes color mean something.
 
 **Everything that makes the Marauder work is upstream's.** The WiFi and Bluetooth tooling, the CLI, the wardriving upload, the Evil Portal, the GPS stack, the drivers — none of that is mine. See [Attribution](#attribution). What is different is listed below, in full, and the changes are also in [`patches/`](patches/) as a diff against upstream v1.17.0.
 
@@ -35,13 +47,13 @@ These are defects in upstream's handling of this panel. Each one is a change to 
 | GPS **date/time and UTC stamps** cut off | the D/T and UTC strings are 23–24 characters — the longest lines on those screens — and went through single-line prints | every GPS data line wraps, and `test_gps_layout` asserts the row budget so a field added later fails a test instead of vanishing |
 | raw **NMEA sentences** cut at 21 characters | `GPS_NMEA_SCRNWRAP` is `false` for the Mini targets, so 60–80 character sentences were clipped — even though that screen's row accounting was written to expect wrapped ones | wrapping enabled for the Mini v3 (`MARAUDER_MINI` left exactly as upstream had it) |
 | GPS indicator in the status bar blank with no module attached | upstream draws it only when a module is detected, and shows red for "no fix" — so *absent* and *searching* looked identical | always drawn, in three states: red = no module, amber = no fix yet, green = fix |
-| `SD` label could be drawn in an undefined colour | `updateStatusBar()` reads `the_color` on the screen path without it having been assigned when `HAS_SD` is undefined | variable initialised, and the SD label only drawn where `HAS_SD` exists |
+| `SD` label could be drawn in an undefined color | `updateStatusBar()` reads `the_color` on the screen path without it having been assigned when `HAS_SD` is undefined | variable initialised, and the SD label only drawn where `HAS_SD` exists |
 
 ## What this build adds on top
 
 Not fixes — additions. Marked separately so nothing is misattributed to upstream:
 
-- **The neon palette and colour scheme.** Menus colour by what an item *is* — tags one colour, Bluetooth another, passive monitors another — with a floor of 35° of hue between any two colours used in the same menu, so no submenu reads as one flat colour. The attack menus are grouped by mechanism: beacon/frame spam, floods and disruption, rogue-AP and social attacks, and (on the Bluetooth side) Apple pop-up spam and tag attacks. Data screens dim the field name and colour the value by its kind.
+- **The neon palette and color scheme.** Menus color by what an item *is* — tags one color, Bluetooth another, passive monitors another — with a floor of 35° of hue between any two colors used in the same menu, so no submenu reads as one flat color. The attack menus are grouped by mechanism: beacon/frame spam, floods and disruption, rogue-AP and social attacks, and (on the Bluetooth side) Apple pop-up spam and tag attacks. Data screens dim the field name and color the value by its kind.
 - **The boot splash.** A synthwave sunset with the CYBERPUNK EDITION wordmark, drawn from a table of horizontal runs (~1.7 KB) rather than a pixel buffer (~18 KB).
 
 ### Screen brightness
@@ -58,10 +70,10 @@ Upstream has this setting and a PWM backlight path, but **both are behind `#ifnd
 
 Both rules are enforced by the generator (`tools/generate_neon_palette.py`) rather than by eye, because both were learned the hard way:
 
-1. **Every colour must be readable as text.** The firmware hands these colours to *menu labels*, so each one is drawn colour-on-black when unselected and black-on-colour when selected — which means a single contrast floor covers both. A colour that looked like a harmless dark fill turned out to be the text colour for a menu, and shipped invisible.
-2. **Saturated colours must be far apart in hue.** Two entries ten degrees apart read as one colour on a small panel. Nothing in the palette is within 30° of anything else.
+1. **Every color must be readable as text.** The firmware hands these colors to *menu labels*, so each one is drawn color-on-black when unselected and black-on-color when selected — which means a single contrast floor covers both. A color that looked like a harmless dark fill turned out to be the text color for a menu, and shipped invisible.
+2. **Saturated colors must be far apart in hue.** Two entries ten degrees apart read as one color on a small panel. Nothing in the palette is within 30° of anything else.
 
-| role | colour | contrast on black |
+| role | color | contrast on black |
 |---|---|---|
 | body / menu text | `#EAF7FF` | 19.4:1 |
 | accent — scanners, WiFi | `#4FE3EE` | 13.5:1 |
@@ -78,9 +90,7 @@ Both rules are enforced by the generator (`tools/generate_neon_palette.py`) rath
 
 ## Flash it
 
-### <a href="https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/" target="_blank" rel="noopener">Open the web flasher &rarr;</a>
-
-Opens in a new tab. Use **Chrome** or **Edge** (Web Serial needs a Chromium browser), plug the board in over USB-C, and pick the port.
+**[Flash it from your browser](https://cgarey2014.github.io/marauder-cyberpunk-edition/web-flasher/)** — Chrome or Edge, plug the board in over USB-C, pick the port.
 
 - **Application update** — replaces the app only. **Keeps your settings**, saved WiFi, and Evil Portal templates. Use this one.
 - **Full install (factory image)** — writes the whole 8 MB flash. For a blank or unknown board; wipes settings.
@@ -109,7 +119,7 @@ This is a derivative work. It would not exist without:
 
 - **[ESP32 Marauder](https://github.com/justcallmekoko/ESP32Marauder)** by **[justcallmekoko](https://github.com/justcallmekoko)** — the firmware, drivers, CLI, and every tool in it. MIT licensed; the original copyright notice is preserved in [`LICENSE`](LICENSE).
 - **Marauder Mini v3** hardware, also by justcallmekoko / JCMK LLC. Not affiliated with, endorsed by, or supported by him. **Do not report problems with this build upstream.**
-- The **neon palette** is derived from a colour reference image supplied by the device owner. No third-party artwork is redistributed here; the SVG header and the palette are original to this repo.
+- The **neon palette** is derived from a color reference image supplied by the device owner. No third-party artwork is redistributed here; the SVG header and the palette are original to this repo.
 
 Modifications copyright © 2026 [cgarey2014](https://github.com/cgarey2014), released under the same MIT terms.
 

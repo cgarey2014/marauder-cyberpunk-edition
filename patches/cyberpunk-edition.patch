@@ -1,6 +1,6 @@
 diff --git a/MINI_V3_COSMO.md b/MINI_V3_COSMO.md
 new file mode 100644
-index 0000000..e93cdf4
+index 0000000..54997f5
 --- /dev/null
 +++ b/MINI_V3_COSMO.md
 @@ -0,0 +1,474 @@
@@ -57,8 +57,8 @@ index 0000000..e93cdf4
 +  cursor exactly where `println()` would have, so surrounding layout is
 +  unchanged. On every target other than the Mini v3 it *is* `println()`.
 +- `Display::displayBuffer()` splits long scan-output lines into several screen
-+  buffer rows on the Mini v3. The colour macro at the start of a line is carried
-+  onto each wrapped row so continuation rows keep their colour, and the last row
++  buffer rows on the Mini v3. The color macro at the start of a line is carried
++  onto each wrapped row so continuation rows keep their color, and the last row
 +  of a logical line is still space-padded so it erases what was there before.
 +- `Display::drawCentreTitle()` draws centred titles in font 2, falling back to
 +  font 1 whenever font 2 would overrun the panel. Only the Mini v3 falls back;
@@ -106,8 +106,8 @@ index 0000000..e93cdf4
 +
 +| report | cause | fix |
 +|---|---|---|
-+| WiFi and Bluetooth counters same colour while wardriving | the palette's "success" colour was mint `#3FE8B0`, 27 degrees of hue from the accent cyan `#4FE3EE` the BT counter used - indistinguishable at 16 px | success is now a true green, Bluetooth has its own purple family, and the generator refuses any palette with two saturated entries within 30 degrees of hue |
-+| not enough colour variety, inconsistent | a menu of one kind was a rainbow of one-off colours, or (after the first attempt at fixing that) one flat colour for the whole menu | 185 `addNodes` colours repainted by family, then refined so no menu uses fewer than two colours: scanners cyan, sniffers pale cyan, attacks split by mechanism (spam red, floods magenta, rogue-AP yellow), Bluetooth purple, GPS green, files orange, choices yellow, fox hunt lime, settings neutral, Back rows de-emphasised |
++| WiFi and Bluetooth counters same color while wardriving | the palette's "success" color was mint `#3FE8B0`, 27 degrees of hue from the accent cyan `#4FE3EE` the BT counter used - indistinguishable at 16 px | success is now a true green, Bluetooth has its own purple family, and the generator refuses any palette with two saturated entries within 30 degrees of hue |
++| not enough color variety, inconsistent | a menu of one kind was a rainbow of one-off colors, or (after the first attempt at fixing that) one flat color for the whole menu | 185 `addNodes` colors repainted by family, then refined so no menu uses fewer than two colors: scanners cyan, sniffers pale cyan, attacks split by mechanism (spam red, floods magenta, rogue-AP yellow), Bluetooth purple, GPS green, files orange, choices yellow, fox hunt lime, settings neutral, Back rows de-emphasised |
 +| GPS screens cut the text off | the date/time and UTC stamps (23-24 chars) went through single-line prints on a 21-character panel | every GPS data line now wraps; the row budget is asserted by `test_gps_layout` so a field added later fails a test instead of disappearing |
 +| battery indicator | this board defines no battery source at all, and its IP5306's I2C pins are not documented anywhere public | **not implemented - an attempt was reverted, see below.** Bootloader and everything else unaffected |
 +
@@ -126,7 +126,7 @@ index 0000000..e93cdf4
 +The whole UI is rethemed to a neon cyberpunk palette: cyan, magenta, amber and
 +lime on black, with a deep indigo status bar instead of the stock flat grey.
 +
-+**How it is applied.** The sources now name colours `NEON_<NAME>` instead of
++**How it is applied.** The sources now name colors `NEON_<NAME>` instead of
 +`TFT_<NAME>` (575 call sites across 10 files). `NeonPalette.h` maps each name one
 +way:
 +
@@ -139,7 +139,7 @@ index 0000000..e93cdf4
 +```
 +
 +So the theme is a Mini v3 change only. On every other target each `NEON_` name
-+expands to the exact stock macro it replaced, so no other board's *colours* change
++expands to the exact stock macro it replaced, so no other board's *colors* change
 +— `test_neon_theme_offtarget` checks that direction, and that the off-target arm is
 +not the neon palette. The mapping is deliberately one macro per legacy token name;
 +collapsing two legacy names onto one macro would have silently changed the value
@@ -153,11 +153,11 @@ index 0000000..e93cdf4
 +centre as `SCREEN_WIDTH / 2`, which is not `TFT_WIDTH / 2` on landscape panels;
 +that was caught by building a second target and has been fixed).
 +
-+**Where the colours come from.** The palette is taken from reference artwork the
++**Where the colors come from.** The palette is taken from reference artwork the
 +user supplied (a synthwave poster). The image was analysed rather than eyeballed:
 +its saturated pixels were clustered by hue, giving these dominant accents -
 +
-+| hue | colour | share of accent pixels |
++| hue | color | share of accent pixels |
 +|---|---|---|
 +| magenta/pink | `#ED35BC` | 27.6% |
 +| cyan | `#45D8E2` | 17.2% |
@@ -168,30 +168,30 @@ index 0000000..e93cdf4
 +| blue-grey | `#39516E` | 5.5% |
 +| mint/teal | `#4EACA0` | 1.4% |
 +
-+Those hues are what the palette is built from. Three of the artwork's own colours are
++Those hues are what the palette is built from. Three of the artwork's own colors are
 +too dark to read on a black panel (the blue-grey and the purple especially) and it has
 +almost no green at all, so those entries are lifted or supplied while staying in the
 +artwork's families.
 +
-+**Rule 1: every colour must be readable as text.** This is the rule that matters, and
++**Rule 1: every color must be readable as text.** This is the rule that matters, and
 +getting it wrong is what shipped an earlier build's unreadable text.
-+`MenuFunctions::getColor()` hands these colours to *menu labels*, so each one is drawn
-+colour-on-black when its row is unselected and black-on-colour when it is selected.
++`MenuFunctions::getColor()` hands these colors to *menu labels*, so each one is drawn
++color-on-black when its row is unselected and black-on-color when it is selected.
 +Contrast is symmetric, so a single floor - 4.5:1 against black - covers both cases, and
-+there is no such thing as a colour that is "only a background". An earlier version of
++there is no such thing as a color that is "only a background". An earlier version of
 +this palette exempted two dark entries as fills, and `TFTNAVY` - which upstream uses as
-+the *text* colour for "Add SSIDs", "Select APs" and "Save APs" - landed at **1.33:1**,
++the *text* color for "Add SSIDs", "Select APs" and "Save APs" - landed at **1.33:1**,
 +invisible in both states.
 +
-+**Rule 2: saturated colours must be far apart in hue.** Two entries about ten degrees
-+apart in hue read as one colour on a 128 px panel. That is exactly how the wardriving
++**Rule 2: saturated colors must be far apart in hue.** Two entries about ten degrees
++apart in hue read as one color on a 128 px panel. That is exactly how the wardriving
 +screen ended up with a WiFi counter and a Bluetooth counter that looked the same:
 +mint-green (`#3FE8B0`, hue 157) and cyan (`#4FE3EE`, hue 184) are 27 degrees apart and
 +indistinguishable at 16 px. Nothing in the palette is now within 30 degrees of anything
 +else. The generator fails loudly on a violation - it caught orange against yellow at 19
 +degrees while this palette was being rebuilt.
 +
-+| role | colour | on black | hue |
++| role | color | on black | hue |
 +|---|---|---|---|
 +| body / menu text | `#EAF7FF` | 19.4:1 | neutral |
 +| accent - scanners, WiFi, hints (image cyan) | `#4FE3EE` | 13.5:1 | 184 |
@@ -207,7 +207,7 @@ index 0000000..e93cdf4
 +| configuration, settings (neutral) | `#CFDCEE` | 15.4:1 | neutral |
 +| **Back / exit rows** (de-emphasised) | `#93A2C0` | 8.2:1 | neutral |
 +
-+Where two legacy names mean the same kind of thing they now share one colour, so that
++Where two legacy names mean the same kind of thing they now share one color, so that
 +items of a kind read identically: `TFTNAVY`/`TFTBLUE`, `TFTVIOLET`/`TFTPURPLE`,
 +`TFTMAROON`/`TFTRED`, `TFTPINK`/`TFTMAGENTA`, `TFTGOLD`/`TFTYELLOW`,
 +`TFTDARKCYAN`/`TFTCYAN`, `TFTDARKGREEN`/`TFTGREEN`, `TFTOLIVE`/`TFTGREENYELLOW`/`TFTLIME`.
@@ -219,10 +219,10 @@ index 0000000..e93cdf4
 +more than one hue family, and that the WiFi and Bluetooth roles are not in the same hue
 +sector again.
 +
-+**Which colour goes where.** The point of the scheme is that a colour means something,
-+so the same kind of thing is always the same colour:
++**Which color goes where.** The point of the scheme is that a color means something,
++so the same kind of thing is always the same color:
 +
-+| where | colours |
++| where | colors |
 +|---|---|
 +| main menu | Recon magenta, WiFi green, Bluetooth purple, GPS green, Device blue |
 +| WiFi scanners / AP lists | cyan |
@@ -240,20 +240,20 @@ index 0000000..e93cdf4
 +| Back / exit rows, everywhere | de-emphasised grey |
 +
 +Within the menu tree this is a deliberate reassignment: 185 of the 246 `addNodes`
-+colours were repainted so that a menu of one kind is one colour. A blanket sweep was
++colors were repainted so that a menu of one kind is one color. A blanket sweep was
 +tried first and reverted - its keyword matching hit the substring `ble` inside
 +`text_table1`, repainted the whole top-level menu, and made WiFi and Bluetooth the same
-+colour again, which is the exact bug being fixed. The shipped version leaves the root
++color again, which is the exact bug being fixed. The shipped version leaves the root
 +menus alone, preserves every author's red "danger" node, and protects the settings
 +toggle nodes (`icon == SETTINGS && color == TFTLIGHTGREY` is load-bearing: seven places,
 +including navigation, branch on it).
 +
-+The wardriving screen is now role-coloured too: WiFi frames green, Bluetooth frames
++The wardriving screen is now role-colored too: WiFi frames green, Bluetooth frames
 +purple, Flock detections red, satellite count cyan, and the log file name and size
 +orange.
 +
 +The panel is driven with native RGB565 (this firmware builds no sprites and never
-+calls `setColorDepth`), so a colour constant reaches the display as written.
++calls `setColorDepth`), so a color constant reaches the display as written.
 +
 +
 +## Status bar indicators
@@ -265,7 +265,7 @@ index 0000000..e93cdf4
 +only when a module was detected, so a missing GPS module and a module that simply had no
 +satellite lock both showed nothing:
 +
-+| state | colour |
++| state | color |
 +|---|---|
 +| no module detected (wiring or power) | red |
 +| module present, no fix yet (looking at the sky) | amber |
@@ -426,12 +426,12 @@ index 0000000..e93cdf4
 +  string and the `Marauder Mini v3` hardware name.
 +- 121 native unit tests pass: 20 cover the line-wrapping helpers, 6 the splash
 +  layout (bands disjoint, nothing off-panel), 9 the neon palette (contrast, mapping,
-+  hue spread, plus a regression test naming the menu colours that were unreadable) and
-+  2 the off-target colour mapping.
++  hue spread, plus a regression test naming the menu colors that were unreadable) and
++  2 the off-target color mapping.
 +- **The retheme does not reach other targets.** `test_neon_theme_offtarget` compiles
-+  the off-Mini-v3 arm of `NeonPalette.h` and asserts every one of the 23 colour names
++  the off-Mini-v3 arm of `NeonPalette.h` and asserts every one of the 23 color names
 +  expands to the exact stock TFT_eSPI value, and that none of them resolves to a neon
-+  entry. It also runs the check in the other direction, so a colour name that lost its
++  entry. It also runs the check in the other direction, so a color name that lost its
 +  mapping would fail rather than silently change another board's palette.
 +- **A second target was built to check for collateral damage**, and it earned its
 +  keep: the first version of the title helper centred on `SCREEN_WIDTH / 2`, which is
@@ -2475,7 +2475,7 @@ index 338d3eb..3732046 100644
    #ifndef GPS_NMEA_SCRNWRAP
      #define GPS_NMEA_SCRNWRAP true
 diff --git a/esp32_marauder/MenuFunctions.cpp b/esp32_marauder/MenuFunctions.cpp
-index da0ac51..09ce91d 100644
+index da0ac51..72854e6 100644
 --- a/esp32_marauder/MenuFunctions.cpp
 +++ b/esp32_marauder/MenuFunctions.cpp
 @@ -29,11 +29,11 @@ void MenuFunctions::drawMiniMenuButton(int b, int x, bool selected, uint16_t tex
@@ -2872,7 +2872,7 @@ index da0ac51..09ce91d 100644
        uploadLogsMenu.parentMenu = &wifiGeneralMenu;
  
 -      this->addNodes(&uploadLogsMenu, "Back", TFTLIGHTGREY, 0, [this]() {
-+      this->addNodes(&uploadLogsMenu, "Back", TFT_DARKGREY, 0, [this]() {
++      this->addNodes(&uploadLogsMenu, "Back", TFTDARKGREY, 0, [this]() {
          this->changeMenu(uploadLogsMenu.parentMenu, true);
        });
  
@@ -2892,7 +2892,7 @@ index da0ac51..09ce91d 100644
    foxSortMenu.parentMenu = current_menu;
 -  this->addNodes(&foxSortMenu, text09, TFTLIGHTGREY, 0, [this]() { this->changeMenu(foxSortMenu.parentMenu, true); });
 -  this->addNodes(&foxSortMenu, "Signal: Strongest", TFTCYAN, 255, [this]() {
-+  this->addNodes(&foxSortMenu, text09, TFT_DARKGREY, 0, [this]() { this->changeMenu(foxSortMenu.parentMenu, true); });
++  this->addNodes(&foxSortMenu, text09, TFTDARKGREY, 0, [this]() { this->changeMenu(foxSortMenu.parentMenu, true); });
 +  this->addNodes(&foxSortMenu, "Signal: Strongest", TFTLIME, 255, [this]() {
      fox_sort_mode = TargetSortMode::SIGNAL_DESC;
      buildFoxTargetList(fox_target_list, fox_target_context_ap);
@@ -2914,7 +2914,7 @@ index da0ac51..09ce91d 100644
    foxFilterMenu.parentMenu = current_menu;
 -  this->addNodes(&foxFilterMenu, text09, TFTLIGHTGREY, 0, [this]() { this->changeMenu(foxFilterMenu.parentMenu, true); });
 -  this->addNodes(&foxFilterMenu, "All", TFTGREEN, 255, [this]() {
-+  this->addNodes(&foxFilterMenu, text09, TFT_DARKGREY, 0, [this]() { this->changeMenu(foxFilterMenu.parentMenu, true); });
++  this->addNodes(&foxFilterMenu, text09, TFTDARKGREY, 0, [this]() { this->changeMenu(foxFilterMenu.parentMenu, true); });
 +  this->addNodes(&foxFilterMenu, "All", TFTLIME, 255, [this]() {
      fox_filter_mode = TargetFilterMode::ALL;
      buildFoxTargetList(fox_target_list, fox_target_context_ap);
@@ -2954,7 +2954,7 @@ index da0ac51..09ce91d 100644
 -  this->addNodes(&foxHuntMenu, text09, TFTLIGHTGREY, 0, [this]() { this->changeMenu(foxHuntMenu.parentMenu, true); });
 -  this->addNodes(&foxHuntMenu, "APs", TFTLIME, WIFI, [this]() { buildFoxTargetList(FoxHuntListKind::AP_TARGETS); });
 -  this->addNodes(&foxHuntMenu, "Stations", TFTMAGENTA, WIFI, [this]() { buildFoxTargetList(FoxHuntListKind::APS_WITH_STATIONS); });
-+  this->addNodes(&foxHuntMenu, text09, TFT_DARKGREY, 0, [this]() { this->changeMenu(foxHuntMenu.parentMenu, true); });
++  this->addNodes(&foxHuntMenu, text09, TFTDARKGREY, 0, [this]() { this->changeMenu(foxHuntMenu.parentMenu, true); });
 +  this->addNodes(&foxHuntMenu, "APs", TFTCYAN, WIFI, [this]() { buildFoxTargetList(FoxHuntListKind::AP_TARGETS); });
 +  this->addNodes(&foxHuntMenu, "Stations", TFTCYAN, WIFI, [this]() { buildFoxTargetList(FoxHuntListKind::APS_WITH_STATIONS); });
    this->addNodes(&foxHuntMenu, "WiFi Pineapples", TFTYELLOW, PINESCAN_SNIFF, [this]() { buildFoxTargetList(FoxHuntListKind::PINEAPPLE_TARGETS); });
@@ -2972,7 +2972,7 @@ index da0ac51..09ce91d 100644
 -  this->addNodes(&foxHuntMenu, "Flipper Zero", TFTORANGE, FLIPPER, [this]() { buildFoxTargetList(FoxHuntListKind::FLIPPER_TARGETS); });
 -  this->addNodes(&foxHuntMenu, "Meta", TFTWHITE, BLUETOOTH, [this]() { buildFoxTargetList(FoxHuntListKind::META_TARGETS); });
 -  this->addNodes(&foxHuntMenu, "Flock", TFTORANGE, FLOCK, [this]() { buildFoxTargetList(FoxHuntListKind::FLOCK_TARGETS); });
-+  this->addNodes(&foxHuntMenu, text09, TFT_DARKGREY, 0, [this]() { this->changeMenu(foxHuntMenu.parentMenu, true); });
++  this->addNodes(&foxHuntMenu, text09, TFTDARKGREY, 0, [this]() { this->changeMenu(foxHuntMenu.parentMenu, true); });
 +  this->addNodes(&foxHuntMenu, "BLE Devices", TFTPURPLE, BLUETOOTH, [this]() { buildFoxTargetList(FoxHuntListKind::BLE_TARGETS); });
 +  this->addNodes(&foxHuntMenu, "FindMy", TFTMAGENTA, BLUETOOTH, [this]() { buildFoxTargetList(FoxHuntListKind::FINDMY_TARGETS); });
 +  this->addNodes(&foxHuntMenu, "Flipper Zero", TFTPURPLE, FLIPPER, [this]() { buildFoxTargetList(FoxHuntListKind::FLIPPER_TARGETS); });
@@ -3020,7 +3020,7 @@ index da0ac51..09ce91d 100644
    // Build WiFi scanner Menu
    wifiScannerMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
 -  this->addNodes(&wifiScannerMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&wifiScannerMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&wifiScannerMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(wifiScannerMenu.parentMenu, true);
    });
 -  this->addNodes(&wifiScannerMenu, "Ping Scan", TFTGREEN, SCANNERS, [this]() {
@@ -3043,7 +3043,7 @@ index da0ac51..09ce91d 100644
      // Add the back button
      wifiIPMenu.list->clear();
 -      this->addNodes(&wifiIPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+      this->addNodes(&wifiIPMenu, text09, TFT_DARKGREY, 0, [this]() {
++      this->addNodes(&wifiIPMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(wifiIPMenu.parentMenu, true);
      });
  
@@ -3114,7 +3114,7 @@ index da0ac51..09ce91d 100644
    // Build WiFi sniffer Menu
    wifiSnifferMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
 -  this->addNodes(&wifiSnifferMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&wifiSnifferMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&wifiSnifferMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(wifiSnifferMenu.parentMenu, true);
    });
    this->addNodes(&wifiSnifferMenu, text_table1[42], TFTCYAN, PROBE_SNIFF, [this]() {
@@ -3256,7 +3256,7 @@ index da0ac51..09ce91d 100644
    #ifdef HAS_GPS
      /*wardrivingMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
 -    this->addNodes(&wardrivingMenu, text09, TFTLIGHTGREY, NULL, 0, [this]() {
-+    this->addNodes(&wardrivingMenu, text09, TFT_DARKGREY, NULL, 0, [this]() {
++    this->addNodes(&wardrivingMenu, text09, TFTDARKGREY, NULL, 0, [this]() {
        this->changeMenu(wardrivingMenu.parentMenu, true);
      });*/
      if (gps_obj.getGpsModuleStatus()) {
@@ -3283,7 +3283,7 @@ index da0ac51..09ce91d 100644
    // Build WiFi attack menu
    wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
 -  this->addNodes(&wifiAttackMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&wifiAttackMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&wifiAttackMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(wifiAttackMenu.parentMenu, true);
    });
    this->addNodes(&wifiAttackMenu, text_table1[50], TFTRED, BEACON_LIST, [this]() {
@@ -3330,11 +3330,11 @@ index da0ac51..09ce91d 100644
      ssidsMenu.parentMenu = &evilPortalMenu;
  
 -    this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(wifiAPMenu.parentMenu, true);
      });
 -    this->addNodes(&ssidsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&ssidsMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&ssidsMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(ssidsMenu.parentMenu, true);
      });
  
@@ -3387,7 +3387,7 @@ index da0ac51..09ce91d 100644
      // Add the back button
      selectProbeSSIDsMenu.list->clear();
 -    this->addNodes(&selectProbeSSIDsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&selectProbeSSIDsMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&selectProbeSSIDsMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(&wifiAttackMenu, true);
      });
  
@@ -3454,7 +3454,7 @@ index da0ac51..09ce91d 100644
  
    evilPortalMenu.parentMenu = &wifiAttackMenu;
 -  this->addNodes(&evilPortalMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&evilPortalMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&evilPortalMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(evilPortalMenu.parentMenu, true);
    });
 -  this->addNodes(&evilPortalMenu, "AP Config", TFTMAGENTA, SD_UPDATE, [this]() {
@@ -3481,7 +3481,7 @@ index da0ac51..09ce91d 100644
    // Build WiFi General menu
    wifiGeneralMenu.parentMenu = &wifiMenu;
 -  this->addNodes(&wifiGeneralMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&wifiGeneralMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&wifiGeneralMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(wifiGeneralMenu.parentMenu, true);
    });
 -  this->addNodes(&wifiGeneralMenu, text_table1[27], TFTSKYBLUE, GENERATE, [this]() {
@@ -3497,7 +3497,7 @@ index da0ac51..09ce91d 100644
  
      // Add the back button
 -    this->addNodes(&selectProbeSSIDsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&selectProbeSSIDsMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&selectProbeSSIDsMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(&wifiGeneralMenu, true);
  
        // TODO: TBD - Should probe_req_ssids have it´s own life and override ap.config and/or ssids -list for EP?
@@ -3543,7 +3543,7 @@ index da0ac51..09ce91d 100644
        // Add the back button
        htmlMenu.list->clear();
 -        this->addNodes(&htmlMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+        this->addNodes(&htmlMenu, text09, TFT_DARKGREY, 0, [this]() {
++        this->addNodes(&htmlMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(htmlMenu.parentMenu, true);
        });
  
@@ -3560,7 +3560,7 @@ index da0ac51..09ce91d 100644
  
      htmlMenu.parentMenu = &wifiGeneralMenu;
 -    this->addNodes(&htmlMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&htmlMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&htmlMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(htmlMenu.parentMenu, true);
      });
  
@@ -3571,7 +3571,7 @@ index da0ac51..09ce91d 100644
        // Add the back button
        wifiAPMenu.list->clear();
 -        this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+        this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++        this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(wifiAPMenu.parentMenu, true);
        });
  
@@ -3585,7 +3585,7 @@ index da0ac51..09ce91d 100644
        // Add the back button
        wifiAPMenu.list->clear();
 -        this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+        this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++        this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(wifiAPMenu.parentMenu, true);
        });
  
@@ -3594,19 +3594,19 @@ index da0ac51..09ce91d 100644
  
      apInfoMenu.parentMenu = &wifiAPMenu;
 -    this->addNodes(&apInfoMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&apInfoMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&apInfoMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(apInfoMenu.parentMenu, true);
      });
  
      wifiAPMenu.parentMenu = &wifiGeneralMenu;
 -    this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(wifiAPMenu.parentMenu, true);
      });
  
      wifiIPMenu.parentMenu = &wifiScannerMenu;
 -    this->addNodes(&wifiIPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&wifiIPMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&wifiIPMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(wifiIPMenu.parentMenu, true);
      });
  
@@ -3618,7 +3618,7 @@ index da0ac51..09ce91d 100644
  
        wifiAPMenu.list->clear();
 -        this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+        this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++        this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(wifiAPMenu.parentMenu, true);
        });
  
@@ -3627,7 +3627,7 @@ index da0ac51..09ce91d 100644
  
            // Add back button to the APs
 -          this->addNodes(&wifiStationMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+          this->addNodes(&wifiStationMenu, text09, TFT_DARKGREY, 0, [this]() {
++          this->addNodes(&wifiStationMenu, text09, TFTDARKGREY, 0, [this]() {
              this->changeMenu(wifiStationMenu.parentMenu, true);
            });
  
@@ -3648,7 +3648,7 @@ index da0ac51..09ce91d 100644
        // Add the back button
        wifiAPMenu.list->clear();
 -        this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+        this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++        this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(wifiAPMenu.parentMenu, true);
        });
  
@@ -3684,7 +3684,7 @@ index da0ac51..09ce91d 100644
        // Add the back button
        ssidsMenu.list->clear();
 -        this->addNodes(&ssidsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+        this->addNodes(&ssidsMenu, text09, TFT_DARKGREY, 0, [this]() {
++        this->addNodes(&ssidsMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(ssidsMenu.parentMenu, true);
        });
  
@@ -3711,7 +3711,7 @@ index da0ac51..09ce91d 100644
  
      wifiStationMenu.parentMenu = &ssidsMenu;
 -    this->addNodes(&wifiStationMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&wifiStationMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&wifiStationMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(wifiStationMenu.parentMenu, true);
      });
  
@@ -3746,7 +3746,7 @@ index da0ac51..09ce91d 100644
  
      uploadAllMenu.parentMenu = &uploadLogsMenu;
 -    this->addNodes(&uploadAllMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&uploadAllMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&uploadAllMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(uploadAllMenu.parentMenu, true);
      });
 -    this->addNodes(&uploadAllMenu, "WiGLE", TFTLIGHTGREY, 0, [this]() {
@@ -3810,12 +3810,11 @@ index da0ac51..09ce91d 100644
  
      deleteAllMenu.parentMenu = &uploadLogsMenu;
 -    this->addNodes(&deleteAllMenu, "No", TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&deleteAllMenu, "No", TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&deleteAllMenu, "No", TFTDARKGREY, 0, [this]() {
        this->changeMenu(deleteAllMenu.parentMenu, true);
      });
--    this->addNodes(&deleteAllMenu, "Yes", TFTRED, 0, [this]() {
+     this->addNodes(&deleteAllMenu, "Yes", TFTRED, 0, [this]() {
 -      display_obj.tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-+    this->addNodes(&deleteAllMenu, "Yes", TFT_DARKGREY, 0, [this]() {
 +      display_obj.tft.setTextColor(NEON_ORANGE, TFT_BLACK);
  
        display_obj.clearScreen();
@@ -3825,7 +3824,7 @@ index da0ac51..09ce91d 100644
  
      actionMenu.parentMenu = &uploadLogsMenu;
 -    this->addNodes(&actionMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+    this->addNodes(&actionMenu, text09, TFT_DARKGREY, 0, [this]() {
++    this->addNodes(&actionMenu, text09, TFTDARKGREY, 0, [this]() {
        this->changeMenu(actionMenu.parentMenu, true);
      });
 -    this->addNodes(&actionMenu, "WiGLE", TFTLIGHTGREY, 0, [this]() {
@@ -3898,7 +3897,7 @@ index da0ac51..09ce91d 100644
    // Menu for generating and setting MAC addrs for AP and STA
    setMacMenu.parentMenu = &wifiGeneralMenu;
 -  this->addNodes(&setMacMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&setMacMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&setMacMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(setMacMenu.parentMenu, true);
    });
  
@@ -3920,7 +3919,7 @@ index da0ac51..09ce91d 100644
        // Add the back button
        wifiAPMenu.list->clear();
 -        this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+        this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++        this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(wifiAPMenu.parentMenu, true);
        });
  
@@ -3943,7 +3942,7 @@ index da0ac51..09ce91d 100644
        // Add the back button
        wifiAPMenu.list->clear();
 -        this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+        this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++        this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(wifiAPMenu.parentMenu, true);
        });
  
@@ -3960,26 +3959,26 @@ index da0ac51..09ce91d 100644
    // Menu for generating and setting access point MAC (just goes bacK)
    genAPMacMenu.parentMenu = &wifiGeneralMenu;
 -  this->addNodes(&genAPMacMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&genAPMacMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&genAPMacMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(genAPMacMenu.parentMenu, true);
    });
  
    // Build generate ssids menu
    generateSSIDsMenu.parentMenu = &wifiGeneralMenu;
 -  this->addNodes(&generateSSIDsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&generateSSIDsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&generateSSIDsMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(generateSSIDsMenu.parentMenu, true);
    });
  
    // Build clear ssids menu
    
 -  this->addNodes(&clearSSIDsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&clearSSIDsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&clearSSIDsMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(clearSSIDsMenu.parentMenu, true);
    });
    clearAPsMenu.parentMenu = &wifiGeneralMenu;
 -  this->addNodes(&clearAPsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&clearAPsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&clearAPsMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(clearAPsMenu.parentMenu, true);
    });
  
@@ -3996,7 +3995,7 @@ index da0ac51..09ce91d 100644
    // Build bluetooth sniffer Menu
    bluetoothSnifferMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
 -  this->addNodes(&bluetoothSnifferMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&bluetoothSnifferMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&bluetoothSnifferMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(bluetoothSnifferMenu.parentMenu, true);
    });
 -  this->addNodes(&bluetoothSnifferMenu, text_table1[34], TFTGREEN, BLUETOOTH_SNIFF, [this]() {
@@ -4063,7 +4062,7 @@ index da0ac51..09ce91d 100644
    // Bluetooth Attack menu
    bluetoothAttackMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
 -  this->addNodes(&bluetoothAttackMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&bluetoothAttackMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&bluetoothAttackMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(bluetoothAttackMenu.parentMenu, true);
    });
 -  this->addNodes(&bluetoothAttackMenu, "Sour Apple", TFTGREEN, DEAUTH_SNIFF, [this]() {
@@ -4159,7 +4158,7 @@ index da0ac51..09ce91d 100644
            // Clear nodes and add back button
            wifiAPMenu.list->clear();
 -          this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+          this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++          this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
            this->changeMenu(wifiAPMenu.parentMenu, true);
          });
  
@@ -4177,13 +4176,13 @@ index da0ac51..09ce91d 100644
  
        wifiAPMenu.parentMenu = &bluetoothAttackMenu;
 -      this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+      this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++      this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(wifiAPMenu.parentMenu, true);
        });
  
        wifiAPMenu.parentMenu = &bluetoothAttackMenu;
 -      this->addNodes(&wifiAPMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+      this->addNodes(&wifiAPMenu, text09, TFT_DARKGREY, 0, [this]() {
++      this->addNodes(&wifiAPMenu, text09, TFTDARKGREY, 0, [this]() {
          this->changeMenu(wifiAPMenu.parentMenu, true);
        });
      #endif
@@ -4228,7 +4227,7 @@ index da0ac51..09ce91d 100644
    // Save Files Menu
    saveFileMenu.parentMenu = &deviceMenu;
 -  this->addNodes(&saveFileMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&saveFileMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&saveFileMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(saveFileMenu.parentMenu, true);
    });
 -  this->addNodes(&saveFileMenu, "Save SSIDs", TFTCYAN, SD_UPDATE, [this]() {
@@ -4264,37 +4263,37 @@ index da0ac51..09ce91d 100644
  
    saveSSIDsMenu.parentMenu = &saveFileMenu;
 -  this->addNodes(&saveSSIDsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&saveSSIDsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&saveSSIDsMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(saveSSIDsMenu.parentMenu, true);
    });
  
    loadSSIDsMenu.parentMenu = &saveFileMenu;
 -  this->addNodes(&loadSSIDsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&loadSSIDsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&loadSSIDsMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(loadSSIDsMenu.parentMenu, true);
    });
  
    saveAPsMenu.parentMenu = &saveFileMenu;
 -  this->addNodes(&saveAPsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&saveAPsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&saveAPsMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(saveAPsMenu.parentMenu, true);
    });
  
    loadAPsMenu.parentMenu = &saveFileMenu;
 -  this->addNodes(&loadAPsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&loadAPsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&loadAPsMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(loadAPsMenu.parentMenu, true);
    });
  
    saveATsMenu.parentMenu = &saveFileMenu;
 -  this->addNodes(&saveATsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&saveATsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&saveATsMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(saveATsMenu.parentMenu, true);
    });
  
    loadATsMenu.parentMenu = &saveFileMenu;
 -  this->addNodes(&loadATsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&loadATsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&loadATsMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(loadATsMenu.parentMenu, true);
    });
  
@@ -4338,7 +4337,7 @@ index da0ac51..09ce91d 100644
        // GPS POI Menu
        gpsPOIMenu.parentMenu = &gpsMenu;
 -      this->addNodes(&gpsPOIMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+      this->addNodes(&gpsPOIMenu, text09, TFT_DARKGREY, 0, [this]() {
++      this->addNodes(&gpsPOIMenu, text09, TFTDARKGREY, 0, [this]() {
          wifi_scan_obj.currentScanMode = GPS_POI;
          wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
          this->changeMenu(gpsPOIMenu.parentMenu, true);
@@ -4353,7 +4352,7 @@ index da0ac51..09ce91d 100644
        // GPS Info Menu
        gpsInfoMenu.parentMenu = &gpsMenu;
 -      this->addNodes(&gpsInfoMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+      this->addNodes(&gpsInfoMenu, text09, TFT_DARKGREY, 0, [this]() {
++      this->addNodes(&gpsInfoMenu, text09, TFTDARKGREY, 0, [this]() {
          if(wifi_scan_obj.currentScanMode != GPS_TRACKER)
            wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
          wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
@@ -4362,7 +4361,7 @@ index da0ac51..09ce91d 100644
    // Device menu
    settingsMenu.parentMenu = &deviceMenu;
 -  this->addNodes(&settingsMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&settingsMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&settingsMenu, text09, TFTDARKGREY, 0, [this]() {
      changeMenu(settingsMenu.parentMenu, true);
    });
    for (int i = 0; i < settings_obj.getNumberSettings(); i++) {
@@ -4379,7 +4378,7 @@ index da0ac51..09ce91d 100644
    // Specific setting menu
    specSettingMenu.parentMenu = &settingsMenu;
 -  addNodes(&specSettingMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  addNodes(&specSettingMenu, text09, TFT_DARKGREY, 0, [this]() {
++  addNodes(&specSettingMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(specSettingMenu.parentMenu, true);
    });
  
@@ -4388,7 +4387,7 @@ index da0ac51..09ce91d 100644
    // Failed update menu
    failedUpdateMenu.parentMenu = &deviceMenu;
 -  this->addNodes(&failedUpdateMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&failedUpdateMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&failedUpdateMenu, text09, TFTDARKGREY, 0, [this]() {
      wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
      this->changeMenu(failedUpdateMenu.parentMenu, true);
    });
@@ -4396,7 +4395,7 @@ index da0ac51..09ce91d 100644
    // Device info menu
    infoMenu.parentMenu = &deviceMenu;
 -  this->addNodes(&infoMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&infoMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&infoMenu, text09, TFTDARKGREY, 0, [this]() {
      wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
      this->changeMenu(infoMenu.parentMenu, true);
    });
@@ -4405,7 +4404,7 @@ index da0ac51..09ce91d 100644
    geofenceMenu.list->clear();
    geofenceMenu.parentMenu = &deviceMenu;
 -  this->addNodes(&geofenceMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&geofenceMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&geofenceMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(geofenceMenu.parentMenu, true);
    });
    for (uint8_t i = 0; i < MAX_GEOFENCES; i++) {
@@ -4414,7 +4413,7 @@ index da0ac51..09ce91d 100644
    geofenceActionMenu.list->clear();
    geofenceActionMenu.parentMenu = &geofenceMenu;
 -  this->addNodes(&geofenceActionMenu, text09, TFTLIGHTGREY, 0, [this]() { this->buildGeofenceMenu(); });
-+  this->addNodes(&geofenceActionMenu, text09, TFT_DARKGREY, 0, [this]() { this->buildGeofenceMenu(); });
++  this->addNodes(&geofenceActionMenu, text09, TFTDARKGREY, 0, [this]() { this->buildGeofenceMenu(); });
    this->addNodes(&geofenceActionMenu, "Enter coordinates", TFTCYAN, GPS_MENU, [this, slot]() {
      #ifdef HAS_MINI_SCREEN
        this->beginMiniGeofenceEdit(slot, false);
@@ -4451,7 +4450,7 @@ index da0ac51..09ce91d 100644
    sdDeleteMenu.name = "Bin Files";
  
 -  this->addNodes(&sdDeleteMenu, text09, TFTLIGHTGREY, 0, [this]() {
-+  this->addNodes(&sdDeleteMenu, text09, TFT_DARKGREY, 0, [this]() {
++  this->addNodes(&sdDeleteMenu, text09, TFTDARKGREY, 0, [this]() {
      this->changeMenu(sdDeleteMenu.parentMenu, true);
    });
  
@@ -4466,7 +4465,7 @@ index da0ac51..09ce91d 100644
    sdDeleteMenu.name = path == "/" ? "SD File Browser" : path;
  
 -  this->addNodes(&sdDeleteMenu, text09, TFTLIGHTGREY, 0, [this, path]() {
-+  this->addNodes(&sdDeleteMenu, text09, TFT_DARKGREY, 0, [this, path]() {
++  this->addNodes(&sdDeleteMenu, text09, TFTDARKGREY, 0, [this, path]() {
      if (path == "/") {
        sd_delete_selection->clear();
        this->changeMenu(sdDeleteMenu.parentMenu, true);
@@ -4843,7 +4842,7 @@ index 888063e..96a3cf2 100644
      void main(uint32_t currentTime);
 diff --git a/esp32_marauder/NeonPalette.h b/esp32_marauder/NeonPalette.h
 new file mode 100644
-index 0000000..59d69a2
+index 0000000..07c23b6
 --- /dev/null
 +++ b/esp32_marauder/NeonPalette.h
 @@ -0,0 +1,137 @@
@@ -4880,7 +4879,7 @@ index 0000000..59d69a2
 +//   kNeonPurple      black   6.67:1   status bar   6.13:1
 +//   kNeonSky         black  15.29:1   status bar  14.04:1
 +//   kNeonSilver      black  15.43:1   status bar  14.17:1
-+//   kNeonMuted       black   8.24:1   status bar   7.57:1
++//   kNeonMuted       black  11.83:1   status bar  10.86:1
 +//   kNeonWhite       black  21.00:1   status bar  19.29:1
 +
 +namespace marauder {
@@ -4898,7 +4897,7 @@ index 0000000..59d69a2
 +constexpr uint16_t kNeonPurple      = 0xB39E;  // 0xB071F0  image purple, lifted - Bluetooth
 +constexpr uint16_t kNeonSky         = 0x9F3F;  // 0x9FE4FF  pale cyan tint - sniffers (low saturation, see rule 2)
 +constexpr uint16_t kNeonSilver      = 0xCEFD;  // 0xCFDCEE  neutral - settings and configuration
-+constexpr uint16_t kNeonMuted       = 0x9518;  // 0x93A2C0  de-emphasised - Back and exit items, still readable
++constexpr uint16_t kNeonMuted       = 0xB61B;  // 0xB4C1D8  de-emphasised - Back and exit items; dimmer than body text, but still comfortable to read
 +constexpr uint16_t kNeonWhite       = 0xFFFF;  // 0xFFFFFF  maximum emphasis
 +constexpr uint16_t kNeonBlack          = 0x0000;  // panel background
 +
@@ -4985,7 +4984,7 @@ index 0000000..59d69a2
 +  #define NEON_WHITE           TFT_WHITE
 +#endif
 diff --git a/esp32_marauder/ReconMission.cpp b/esp32_marauder/ReconMission.cpp
-index eba62e2..41bd15f 100644
+index eba62e2..e9034d5 100644
 --- a/esp32_marauder/ReconMission.cpp
 +++ b/esp32_marauder/ReconMission.cpp
 @@ -122,7 +122,7 @@ bool ReconMission::start(ReconMode mode) {
@@ -5112,16 +5111,22 @@ index eba62e2..41bd15f 100644
          display_obj.tft.drawString(line, stats_x, body_top + 84, 1);
        } else {
          snprintf(line, sizeof(line), "BLE DEVICE  %lu", (unsigned long)ble_count);
-@@ -757,7 +757,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+@@ -756,35 +756,39 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+     #endif
  
      #if RECON_SCREEN_HEIGHT < 160
++      // The compact panel fits 21 characters in a row. "XX:XX>" costs six of them, so on
++      // this layout the name gets the remaining fifteen rather than the seven it was
++      // being cut to - which was throwing away most of the only identifying information
++      // on the screen.
        const int16_t event_y = RECON_SCREEN_HEIGHT - 10;
 -      display_obj.tft.drawFastHLine(4, event_y - 5, RECON_SCREEN_WIDTH - 8, TFT_DARKGREY);
 +      display_obj.tft.drawFastHLine(4, event_y - 5, RECON_SCREEN_WIDTH - 8, NEON_DARKGREY);
        if (active_mode == ReconMode::WIFI_RECON && ui_relationship_head) {
          const UiRelationship& relationship =
              ui_relationships[(ui_relationship_head + 2) % 3];
-@@ -765,7 +765,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+-        char ap_name[8];
++        char ap_name[16];
          reconTruncate(relationship.ap_name, ap_name, sizeof(ap_name));
          snprintf(line, sizeof(line), "%02X:%02X>%s", relationship.station[4],
                   relationship.station[5], ap_name);
@@ -5130,7 +5135,12 @@ index eba62e2..41bd15f 100644
          display_obj.tft.drawCentreString(line, RECON_SCREEN_WIDTH / 2, event_y, 1);
        } else {
          const UiEvent& latest = ui_events[(ui_event_head + 3) % 4];
-@@ -776,15 +776,15 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+-        if (latest.type == 'p') snprintf(line, sizeof(line), "PRB %.10s", latest.label);
+-        else if (latest.type == 'b') snprintf(line, sizeof(line), "%02X:%02X>%.7s",
++        if (latest.type == 'p') snprintf(line, sizeof(line), "PRB %.17s", latest.label);
++        else if (latest.type == 'b') snprintf(line, sizeof(line), "%02X:%02X>%.15s",
+                                               latest.mac[4], latest.mac[5],
+                                               latest.label[0] ? latest.label : "BLE");
          else if (latest.type) snprintf(line, sizeof(line), "%c %02X:%02X:%02X",
                                         latest.type, latest.mac[3], latest.mac[4], latest.mac[5]);
          else snprintf(line, sizeof(line), "Waiting...");
@@ -5149,7 +5159,7 @@ index eba62e2..41bd15f 100644
          display_obj.tft.drawString(active_mode == ReconMode::WIFI_RECON
                                       ? "NEW ASSOCIATIONS" : "DEVICE TYPE", 8, relation_y, 1);
          for (uint8_t row = 0; row < 3; row++) {
-@@ -804,7 +804,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+@@ -804,7 +808,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
                       event.mac[3], event.mac[4], event.mac[5],
                       event.label[0] ? event.label : "BLE");
            }
@@ -5158,7 +5168,7 @@ index eba62e2..41bd15f 100644
            display_obj.tft.drawString(line, 8, relation_y + 15 + row * 14, 1);
          }
  
-@@ -822,7 +822,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+@@ -822,7 +826,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
              if (channel_activity[first_channel + offset] > peak)
                peak = channel_activity[first_channel + offset];
            const int16_t strip_y = RECON_SCREEN_HEIGHT - 31;
@@ -5167,7 +5177,7 @@ index eba62e2..41bd15f 100644
            display_obj.tft.drawString("CH", 3, strip_y + 7, 1);
            const int16_t chart_left = 22;
            const int16_t slot = (RECON_SCREEN_WIDTH - chart_left - 2) / visible_channels;
-@@ -832,7 +832,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+@@ -832,7 +836,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
              const int16_t x = chart_left + offset * slot;
              display_obj.tft.fillRect(x + 1, strip_y + 16 - height,
                                       slot > 3 ? slot - 3 : 1, height,
@@ -5176,7 +5186,7 @@ index eba62e2..41bd15f 100644
              #ifdef HAS_DUAL_BAND
                const uint8_t channel = wifi_scan_obj.dual_band_channels[index];
              #else
-@@ -840,13 +840,13 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+@@ -840,13 +844,13 @@ void ReconMission::drawDashboard(uint32_t current_time) {
              #endif
              char channel_label[4];
              snprintf(channel_label, sizeof(channel_label), "%u", channel);
@@ -5192,7 +5202,7 @@ index eba62e2..41bd15f 100644
          if (active_mode == ReconMode::WIFI_RECON && ui_relationship_head) {
            const UiRelationship& relationship =
                ui_relationships[(ui_relationship_head + 2) % 3];
-@@ -854,7 +854,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+@@ -854,7 +858,7 @@ void ReconMission::drawDashboard(uint32_t current_time) {
            reconTruncate(relationship.ap_name, ap_name, sizeof(ap_name));
            snprintf(line, sizeof(line), "%02X:%02X > %s", relationship.station[4],
                     relationship.station[5], ap_name);
@@ -5201,7 +5211,7 @@ index eba62e2..41bd15f 100644
            display_obj.tft.drawCentreString(line, RECON_SCREEN_WIDTH / 2, event_y, 1);
          } else {
            const UiEvent& latest = ui_events[(ui_event_head + 3) % 4];
-@@ -865,12 +865,12 @@ void ReconMission::drawDashboard(uint32_t current_time) {
+@@ -865,12 +869,12 @@ void ReconMission::drawDashboard(uint32_t current_time) {
            else if (latest.type) snprintf(line, sizeof(line), "%c %02X:%02X:%02X",
                                           latest.type, latest.mac[3], latest.mac[4], latest.mac[5]);
            else snprintf(line, sizeof(line), "Waiting...");
@@ -7972,10 +7982,10 @@ index 0000000..5ee3d17
 +}
 diff --git a/tools/build_mini_v3.sh b/tools/build_mini_v3.sh
 new file mode 100755
-index 0000000..bff65f6
+index 0000000..14a29a4
 --- /dev/null
 +++ b/tools/build_mini_v3.sh
-@@ -0,0 +1,172 @@
+@@ -0,0 +1,190 @@
 +#!/usr/bin/env bash
 +#
 +# Build the ESP32 Marauder firmware for the Marauder Mini v3 (ESP32-C5).
@@ -8124,6 +8134,24 @@ index 0000000..bff65f6
 +  | xargs -0 -r "${SED_INPLACE[@]}" 's|-fexceptions|-fno-exceptions|g' 2>/dev/null || true
 +find "${HOME}/.arduino15" "${HOME}/Library/Arduino15" \
 +  -path "*esp32-arduino-libs*" -name 'cpp_flags.bak' -delete 2>/dev/null || true
++
++# Pre-flight: menu colours must be palette *index* names. TFT_<NAME>, with the
++# underscore, is TFT_eSPI's raw 16-bit value, which getColor() passes straight through -
++# so a row written that way silently ignores the theme and draws in a stock shade. This
++# shipped once and produced unreadable dark rows, so the build refuses it now.
++python3 - "${SKETCH_DIR}/MenuFunctions.cpp" <<'PY'
++import re, sys
++src = open(sys.argv[1], errors='replace').read()
++valid = {f'TFT{n}' for n in ('WHITE','CYAN','BLUE','RED','GREEN','GREY','GRAY','MAGENTA',
++                             'VIOLET','ORANGE','YELLOW','LIGHTGREY','PURPLE','NAVY',
++                             'SILVER','DARKGREY','SKYBLUE','LIME')}
++bad = sorted({c for c in re.findall(r'addNodes\(&\w+,\s*.*?,\s*(TFT_?[A-Z]+)\s*,', src, re.S)
++              if c not in valid})
++if bad:
++    sys.exit("menu colour(s) not a palette index: " + ", ".join(bad) +
++             "\nThese bypass the theme. Use the index name without the underscore.")
++print("menu colour check: all colours are palette indices")
++PY
 +
 +echo "compiling ${FQBN}"
 +"${ARDUINO_CLI}" compile \
@@ -8451,7 +8479,7 @@ index 0000000..f43c20a
 +    main()
 diff --git a/tools/generate_neon_palette.py b/tools/generate_neon_palette.py
 new file mode 100644
-index 0000000..44ff320
+index 0000000..ba67c50
 --- /dev/null
 +++ b/tools/generate_neon_palette.py
 @@ -0,0 +1,334 @@
@@ -8526,7 +8554,7 @@ index 0000000..44ff320
 +    ("kNeonPurple",  "0xB071F0", "image purple, lifted - Bluetooth"),
 +    ("kNeonSky",     "0x9FE4FF", "pale cyan tint - sniffers (low saturation, see rule 2)"),
 +    ("kNeonSilver",  "0xCFDCEE", "neutral - settings and configuration"),
-+    ("kNeonMuted",   "0x93A2C0", "de-emphasised - Back and exit items, still readable"),
++    ("kNeonMuted",   "0xB4C1D8", "de-emphasised - Back and exit items; dimmer than body text, but still comfortable to read"),
 +    ("kNeonWhite",   "0xFFFFFF", "maximum emphasis"),
 +]
 +

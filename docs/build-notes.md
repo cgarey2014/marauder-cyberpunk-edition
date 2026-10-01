@@ -51,8 +51,8 @@ hardware dependency, so they are covered by unit tests that run on the build hos
   cursor exactly where `println()` would have, so surrounding layout is
   unchanged. On every target other than the Mini v3 it *is* `println()`.
 - `Display::displayBuffer()` splits long scan-output lines into several screen
-  buffer rows on the Mini v3. The colour macro at the start of a line is carried
-  onto each wrapped row so continuation rows keep their colour, and the last row
+  buffer rows on the Mini v3. The color macro at the start of a line is carried
+  onto each wrapped row so continuation rows keep their color, and the last row
   of a logical line is still space-padded so it erases what was there before.
 - `Display::drawCentreTitle()` draws centred titles in font 2, falling back to
   font 1 whenever font 2 would overrun the panel. Only the Mini v3 falls back;
@@ -100,8 +100,8 @@ Four problems were reported from the field, plus one hardware question:
 
 | report | cause | fix |
 |---|---|---|
-| WiFi and Bluetooth counters same colour while wardriving | the palette's "success" colour was mint `#3FE8B0`, 27 degrees of hue from the accent cyan `#4FE3EE` the BT counter used - indistinguishable at 16 px | success is now a true green, Bluetooth has its own purple family, and the generator refuses any palette with two saturated entries within 30 degrees of hue |
-| not enough colour variety, inconsistent | a menu of one kind was a rainbow of one-off colours, or (after the first attempt at fixing that) one flat colour for the whole menu | 185 `addNodes` colours repainted by family, then refined so no menu uses fewer than two colours: scanners cyan, sniffers pale cyan, attacks split by mechanism (spam red, floods magenta, rogue-AP yellow), Bluetooth purple, GPS green, files orange, choices yellow, fox hunt lime, settings neutral, Back rows de-emphasised |
+| WiFi and Bluetooth counters same color while wardriving | the palette's "success" color was mint `#3FE8B0`, 27 degrees of hue from the accent cyan `#4FE3EE` the BT counter used - indistinguishable at 16 px | success is now a true green, Bluetooth has its own purple family, and the generator refuses any palette with two saturated entries within 30 degrees of hue |
+| not enough color variety, inconsistent | a menu of one kind was a rainbow of one-off colors, or (after the first attempt at fixing that) one flat color for the whole menu | 185 `addNodes` colors repainted by family, then refined so no menu uses fewer than two colors: scanners cyan, sniffers pale cyan, attacks split by mechanism (spam red, floods magenta, rogue-AP yellow), Bluetooth purple, GPS green, files orange, choices yellow, fox hunt lime, settings neutral, Back rows de-emphasised |
 | GPS screens cut the text off | the date/time and UTC stamps (23-24 chars) went through single-line prints on a 21-character panel | every GPS data line now wraps; the row budget is asserted by `test_gps_layout` so a field added later fails a test instead of disappearing |
 | battery indicator | this board defines no battery source at all, and its IP5306's I2C pins are not documented anywhere public | **not implemented - an attempt was reverted, see below.** Bootloader and everything else unaffected |
 
@@ -120,7 +120,7 @@ indicators" below.
 The whole UI is rethemed to a neon cyberpunk palette: cyan, magenta, amber and
 lime on black, with a deep indigo status bar instead of the stock flat grey.
 
-**How it is applied.** The sources now name colours `NEON_<NAME>` instead of
+**How it is applied.** The sources now name colors `NEON_<NAME>` instead of
 `TFT_<NAME>` (575 call sites across 10 files). `NeonPalette.h` maps each name one
 way:
 
@@ -133,7 +133,7 @@ way:
 ```
 
 So the theme is a Mini v3 change only. On every other target each `NEON_` name
-expands to the exact stock macro it replaced, so no other board's *colours* change
+expands to the exact stock macro it replaced, so no other board's *colors* change
 — `test_neon_theme_offtarget` checks that direction, and that the off-target arm is
 not the neon palette. The mapping is deliberately one macro per legacy token name;
 collapsing two legacy names onto one macro would have silently changed the value
@@ -147,11 +147,11 @@ arguments the original code made (an earlier version of this change hard-coded t
 centre as `SCREEN_WIDTH / 2`, which is not `TFT_WIDTH / 2` on landscape panels;
 that was caught by building a second target and has been fixed).
 
-**Where the colours come from.** The palette is taken from reference artwork the
+**Where the colors come from.** The palette is taken from reference artwork the
 user supplied (a synthwave poster). The image was analysed rather than eyeballed:
 its saturated pixels were clustered by hue, giving these dominant accents -
 
-| hue | colour | share of accent pixels |
+| hue | color | share of accent pixels |
 |---|---|---|
 | magenta/pink | `#ED35BC` | 27.6% |
 | cyan | `#45D8E2` | 17.2% |
@@ -162,30 +162,30 @@ its saturated pixels were clustered by hue, giving these dominant accents -
 | blue-grey | `#39516E` | 5.5% |
 | mint/teal | `#4EACA0` | 1.4% |
 
-Those hues are what the palette is built from. Three of the artwork's own colours are
+Those hues are what the palette is built from. Three of the artwork's own colors are
 too dark to read on a black panel (the blue-grey and the purple especially) and it has
 almost no green at all, so those entries are lifted or supplied while staying in the
 artwork's families.
 
-**Rule 1: every colour must be readable as text.** This is the rule that matters, and
+**Rule 1: every color must be readable as text.** This is the rule that matters, and
 getting it wrong is what shipped an earlier build's unreadable text.
-`MenuFunctions::getColor()` hands these colours to *menu labels*, so each one is drawn
-colour-on-black when its row is unselected and black-on-colour when it is selected.
+`MenuFunctions::getColor()` hands these colors to *menu labels*, so each one is drawn
+color-on-black when its row is unselected and black-on-color when it is selected.
 Contrast is symmetric, so a single floor - 4.5:1 against black - covers both cases, and
-there is no such thing as a colour that is "only a background". An earlier version of
+there is no such thing as a color that is "only a background". An earlier version of
 this palette exempted two dark entries as fills, and `TFTNAVY` - which upstream uses as
-the *text* colour for "Add SSIDs", "Select APs" and "Save APs" - landed at **1.33:1**,
+the *text* color for "Add SSIDs", "Select APs" and "Save APs" - landed at **1.33:1**,
 invisible in both states.
 
-**Rule 2: saturated colours must be far apart in hue.** Two entries about ten degrees
-apart in hue read as one colour on a 128 px panel. That is exactly how the wardriving
+**Rule 2: saturated colors must be far apart in hue.** Two entries about ten degrees
+apart in hue read as one color on a 128 px panel. That is exactly how the wardriving
 screen ended up with a WiFi counter and a Bluetooth counter that looked the same:
 mint-green (`#3FE8B0`, hue 157) and cyan (`#4FE3EE`, hue 184) are 27 degrees apart and
 indistinguishable at 16 px. Nothing in the palette is now within 30 degrees of anything
 else. The generator fails loudly on a violation - it caught orange against yellow at 19
 degrees while this palette was being rebuilt.
 
-| role | colour | on black | hue |
+| role | color | on black | hue |
 |---|---|---|---|
 | body / menu text | `#EAF7FF` | 19.4:1 | neutral |
 | accent - scanners, WiFi, hints (image cyan) | `#4FE3EE` | 13.5:1 | 184 |
@@ -201,7 +201,7 @@ degrees while this palette was being rebuilt.
 | configuration, settings (neutral) | `#CFDCEE` | 15.4:1 | neutral |
 | **Back / exit rows** (de-emphasised) | `#93A2C0` | 8.2:1 | neutral |
 
-Where two legacy names mean the same kind of thing they now share one colour, so that
+Where two legacy names mean the same kind of thing they now share one color, so that
 items of a kind read identically: `TFTNAVY`/`TFTBLUE`, `TFTVIOLET`/`TFTPURPLE`,
 `TFTMAROON`/`TFTRED`, `TFTPINK`/`TFTMAGENTA`, `TFTGOLD`/`TFTYELLOW`,
 `TFTDARKCYAN`/`TFTCYAN`, `TFTDARKGREEN`/`TFTGREEN`, `TFTOLIVE`/`TFTGREENYELLOW`/`TFTLIME`.
@@ -213,10 +213,10 @@ direction, or two saturated entries sit within 30 degrees of hue.
 more than one hue family, and that the WiFi and Bluetooth roles are not in the same hue
 sector again.
 
-**Which colour goes where.** The point of the scheme is that a colour means something,
-so the same kind of thing is always the same colour:
+**Which color goes where.** The point of the scheme is that a color means something,
+so the same kind of thing is always the same color:
 
-| where | colours |
+| where | colors |
 |---|---|
 | main menu | Recon magenta, WiFi green, Bluetooth purple, GPS green, Device blue |
 | WiFi scanners / AP lists | cyan |
@@ -234,20 +234,20 @@ so the same kind of thing is always the same colour:
 | Back / exit rows, everywhere | de-emphasised grey |
 
 Within the menu tree this is a deliberate reassignment: 185 of the 246 `addNodes`
-colours were repainted so that a menu of one kind is one colour. A blanket sweep was
+colors were repainted so that a menu of one kind is one color. A blanket sweep was
 tried first and reverted - its keyword matching hit the substring `ble` inside
 `text_table1`, repainted the whole top-level menu, and made WiFi and Bluetooth the same
-colour again, which is the exact bug being fixed. The shipped version leaves the root
+color again, which is the exact bug being fixed. The shipped version leaves the root
 menus alone, preserves every author's red "danger" node, and protects the settings
 toggle nodes (`icon == SETTINGS && color == TFTLIGHTGREY` is load-bearing: seven places,
 including navigation, branch on it).
 
-The wardriving screen is now role-coloured too: WiFi frames green, Bluetooth frames
+The wardriving screen is now role-colored too: WiFi frames green, Bluetooth frames
 purple, Flock detections red, satellite count cyan, and the log file name and size
 orange.
 
 The panel is driven with native RGB565 (this firmware builds no sprites and never
-calls `setColorDepth`), so a colour constant reaches the display as written.
+calls `setColorDepth`), so a color constant reaches the display as written.
 
 
 ## Status bar indicators
@@ -259,7 +259,7 @@ right: **GPS**, channel, DRAM percentage, and **SD**.
 only when a module was detected, so a missing GPS module and a module that simply had no
 satellite lock both showed nothing:
 
-| state | colour |
+| state | color |
 |---|---|
 | no module detected (wiring or power) | red |
 | module present, no fix yet (looking at the sky) | amber |
@@ -420,12 +420,12 @@ Proven here, without the device:
   string and the `Marauder Mini v3` hardware name.
 - 121 native unit tests pass: 20 cover the line-wrapping helpers, 6 the splash
   layout (bands disjoint, nothing off-panel), 9 the neon palette (contrast, mapping,
-  hue spread, plus a regression test naming the menu colours that were unreadable) and
-  2 the off-target colour mapping.
+  hue spread, plus a regression test naming the menu colors that were unreadable) and
+  2 the off-target color mapping.
 - **The retheme does not reach other targets.** `test_neon_theme_offtarget` compiles
-  the off-Mini-v3 arm of `NeonPalette.h` and asserts every one of the 23 colour names
+  the off-Mini-v3 arm of `NeonPalette.h` and asserts every one of the 23 color names
   expands to the exact stock TFT_eSPI value, and that none of them resolves to a neon
-  entry. It also runs the check in the other direction, so a colour name that lost its
+  entry. It also runs the check in the other direction, so a color name that lost its
   mapping would fail rather than silently change another board's palette.
 - **A second target was built to check for collateral damage**, and it earned its
   keep: the first version of the title helper centred on `SCREEN_WIDTH / 2`, which is
