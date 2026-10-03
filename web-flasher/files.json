@@ -28,15 +28,15 @@
       "role": "application",
       "offset": 65536,
       "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-application.bin",
-      "size": 2009936,
-      "sha256": "84ad5d2f2f678f2f6d53424a49826b0b9932eea62727f33d34f0d88bb163edf9"
+      "size": 2008736,
+      "sha256": "f58c8d279928aa7066d9f0ce32285acf41cf8c74635dfb949307d02746840f08"
     },
     {
       "role": "merged-factory",
       "offset": 0,
       "path": "firmware/marauder-mini-v3-v1.17.0-cyberpunk-edition-factory-8MB.bin",
       "size": 8388608,
-      "sha256": "bf8a4de6a0cf017c996bbe212cb2e7ae7cefe9d0fa9b7ee3be35d4b679adc814"
+      "sha256": "d81a05b548b7bc7daf20147385807469ee37f2042fa8f3a821b85b62581fdc70"
     }
   ]
 }
